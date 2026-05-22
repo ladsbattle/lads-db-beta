@@ -533,10 +533,14 @@ header {
 </style>
 </head>
 <body>
-
 <header>
-  <div class="site-title">✦ 面板資料庫 ✦</div>
-  <div class="site-sub">戀與深空｜戰鬥討論群面板分享專區</div>
+   <div class="site-sub">
+    <a href="https://line.me/ti/g2/gw9Ds6tjgN1mPRRCKbc7pLofd4Wzd1MJoR71eQ" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">戀與深空戰鬥討論群</a>
+  </div>
+  <div class="site-title" style="margin-top: 0.3rem;">⚔️ 面板資料庫 ⚔️</div>
+  <div class="site-sub" style="margin-top: 0.3rem;">
+    本資料庫收錄「<a href="https://www.facebook.com/share/g/18qcHFWDrj/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">戀與深空戰鬥討論群_臉書面板分享專區</a>」群友分享的定向軌道及開放穩定軌道面板
+  </div>
 </header>
 
 <div class="container">
@@ -545,7 +549,7 @@ header {
     <div class="filter-title">✦ 篩選條件</div>
     <div class="filter-row">
       <!-- Orbit single-select chips -->
-      <div class="filter-group" style="flex: 2; min-width: 280px;">
+     <div class="filter-group orbit-group">
         <label>軌道類型</label>
         <div class="orbit-chips" id="orbitChips">
           <button class="chip" data-orbit="開放" onclick="selectOrbit(this)">開放</button>
@@ -557,18 +561,18 @@ header {
         </div>
       </div>
 
-      <!-- Single layer input -->
+     <!-- Single layer input -->
       <div class="filter-group" style="min-width: 130px; max-width: 170px;">
         <label>層數</label>
         <input class="layer-input" type="number" id="layerInput" placeholder="輸入層數" min="1" oninput="onLayerInput()">
-        <div class="layer-error-msg" id="layerError">輸入內容無效，請重新確認軌道與層數</div>
+        <div class="layer-error-msg" id="layerError">輸入內容無效</div>
       </div>
 
       <!-- Card keyword -->
-      <div class="filter-group" style="min-width: 200px;">
-        <label>日卡關鍵字</label>
+      <div class="filter-group card-group">
+        <label>日卡/搭檔關鍵字（非必填）</label>
         <input class="card-input" type="text" id="cardSearch"
-          placeholder="如：逐光、永恆、深海、掠心、遠空…"
+          placeholder="如：逐光、0階逐光、終末之神"
           oninput="applyFilters()">
       </div>
       <!-- Reset -->
@@ -587,7 +591,6 @@ header {
     <div class="modal-header">
       <div class="modal-orbit" id="mOrbit"></div>
       <div class="modal-layer" id="mLayer"></div>
-      <div class="modal-layer-sub">層</div>
     </div>
     <div class="modal-body">
       <div class="modal-block" id="mUpperBlock">
@@ -753,7 +756,7 @@ function modalBlock(card, partner, dir) {
   if (card === 'N/A') return '<div class="modal-row"><span class="na-text" style="color:var(--text-dim)">單層面板（無此層配置）</span></div>';
   return `<div class="modal-row"><span class="modal-label">日卡</span><span class="modal-val">${card}</span></div>
     <div class="modal-row"><span class="modal-label">搭檔</span><span class="modal-val">${partner}</span></div>
-    <div class="modal-row"><span class="modal-label">譜面</span>${dirTag(dir)}</div>`;
+<div class="modal-row"><span class="modal-label">對譜情形</span><span class="modal-val">${dirText}</span></div>`;
 }
 
 function openModal(idx) {
@@ -764,7 +767,7 @@ function openModal(idx) {
   document.getElementById('mLowerContent').innerHTML = modalBlock(d.lowerCard, d.lowerPartner, d.lowerDir);
 
   const subj = encodeURIComponent(`【面板連結回報】${d.orbit}軌道 ${d.layer}層`);
-  const body = encodeURIComponent(`回報面板：\n軌道：${d.orbit}\n層數：${d.layer}\n上層日卡：${d.upperCard !== 'N/A' ? d.upperCard : '無'}\n下層日卡：${d.lowerCard !== 'N/A' ? d.lowerCard : '無'}\n連結：${d.link}\n\n問題說明（請填寫）：`);
+  const body = encodeURIComponent(`✦ 回報面板：\n軌道：${d.orbit}\n｜層數：${d.layer}\n｜上層日卡：${d.upperCard !== 'N/A' ? d.upperCard : '無'}\n｜下層日卡：${d.lowerCard !== 'N/A' ? d.lowerCard : '無'}\n｜連結：${d.link}\n\n✦ 問題說明：`);
 
   document.getElementById('mFooter').innerHTML = `
     <a href="${d.link}" target="_blank" rel="noopener" class="btn-fb">
@@ -772,7 +775,7 @@ function openModal(idx) {
       前往Facebook查看
     </a>
     <a href="mailto:rhthv6hbw6@privaterelay.appleid.com?subject=${subj}&body=${body}" class="btn-report">
-      ⚠ 錯誤回報（連結失效）
+      錯誤回報
     </a>`;
 
   document.getElementById('modalOverlay').classList.add('show');
