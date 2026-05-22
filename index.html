@@ -750,7 +750,7 @@ function renderCards() {
   const grid = document.getElementById('cardsGrid');
   document.getElementById('resultsInfo').innerHTML = `共找到 <span>${currentData.length}</span> 筆結果`;
   if (currentData.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">✖</div><p>找不到符合條件的結果 期待您成為第一位分享者✨</p></div>`;
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">🌫️</div><p>找不到符合條件的結果 期待您成為第一位分享者✨</p></div>`;
     return;
   }
   grid.innerHTML = currentData.map((d, i) => `
