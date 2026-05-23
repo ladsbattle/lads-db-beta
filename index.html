@@ -793,7 +793,7 @@ document.getElementById('mLayer').style.color = orbitColors[d.orbit] || 'var(--t
   document.getElementById('mUpperContent').innerHTML = modalBlock(d.upperCard, d.upperPartner, d.upperDir);
   document.getElementById('mLowerContent').innerHTML = modalBlock(d.lowerCard, d.lowerPartner, d.lowerDir);
 
-  const subj = encodeURIComponent(`【面板資料庫】錯誤回報_${d.orbit}軌道 ${d.layer}層`);
+  const subj = encodeURIComponent(`【面板資料庫】問題回報_${d.orbit}軌道 ${d.layer}層`);
   const body = encodeURIComponent(
   `✦ 問題面板：\r\n
   ｜軌道：${d.orbit}\r\n
@@ -811,7 +811,7 @@ document.getElementById('mLayer').style.color = orbitColors[d.orbit] || 'var(--t
       前往Facebook查看
     </a>
     <a href="mailto:ladsbattle@gmail.com?subject=${subj}&body=${body}" class="btn-report">
-      錯誤回報
+      問題回報
     </a>`;
 
   document.getElementById('modalOverlay').classList.add('show');
