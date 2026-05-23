@@ -798,9 +798,11 @@ document.getElementById('mLayer').style.color = orbitColors[d.orbit] || 'var(--t
   `✦ 問題面板：\r\n
   ｜軌道：${d.orbit}\r\n
   ｜層數：${d.layer}\r\n
+  ｜上層日卡：${d.upperCard !== 'N/A' ? d.upperCard : '無'}\r\n
+  ｜下層日卡：${d.lowerCard !== 'N/A' ? d.lowerCard : '無'}\r\n
   ｜連結：${d.link}\r\n
   \r\n
-  ✦ 問題說明：`
+  ✦ 問題說明：(如資料丟失、內容錯誤或其他建議）`
   );
   
   document.getElementById('mFooter').innerHTML = `
