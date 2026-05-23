@@ -793,8 +793,8 @@ document.getElementById('mLayer').style.color = orbitColors[d.orbit] || 'var(--t
   document.getElementById('mUpperContent').innerHTML = modalBlock(d.upperCard, d.upperPartner, d.upperDir);
   document.getElementById('mLowerContent').innerHTML = modalBlock(d.lowerCard, d.lowerPartner, d.lowerDir);
 
-  const subj = encodeURIComponent(`【錯誤回報】${d.orbit}軌道 ${d.layer}層`);
-  const body = encodeURIComponent(`✦ 問題面板：\n｜軌道：${d.orbit}\n｜層數：${d.layer}\n｜上層日卡：${d.upperCard !== 'N/A' ? d.upperCard : '無'}\n｜下層日卡：${d.lowerCard !== 'N/A' ? d.lowerCard : '無'}\n｜連結：${d.link}\n\n✦ 問題說明：`);
+  const subj = encodeURIComponent(`【面板資料庫｜戀與深空戰鬥討論群】錯誤回報_${d.orbit}軌道 ${d.layer}層`);
+  const body = encodeURIComponent(`✦ 問題面板：\n${d.orbit}${d.layer}\n/上層日卡：${d.upperCard !== 'N/A' ? d.upperCard : '無'}\n/下層日卡：${d.lowerCard !== 'N/A' ? d.lowerCard : '無'}\n/連結：${d.link}\n\n\n✦ 問題說明：`);
 
   document.getElementById('mFooter').innerHTML = `
     <a href="${d.link}" target="_blank" rel="noopener" class="btn-fb">
