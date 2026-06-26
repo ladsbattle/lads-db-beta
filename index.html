@@ -972,11 +972,11 @@ select.card-input option {
       </div>
     </div>
 
-    <div class="detail-label">細部條件</div>
+    <div class="detail-label">進階條件</div>
     <div class="filter-row panel-filter-row detail-row">
       <!-- Single layer input -->
       <div class="filter-group layer-group">
-        <label>層數</label>
+        <label>軌道層數</label>
         <input class="layer-input" type="number" id="layerInput" placeholder="輸入層數" min="1" oninput="onLayerInput()">
         <div class="layer-error-msg" id="layerError">輸入內容無效</div>
       </div>
@@ -991,7 +991,7 @@ select.card-input option {
 
       <!-- Card keyword -->
       <div class="filter-group card-group">
-        <label>日卡/搭檔關鍵字（非必填）</label>
+        <label>日卡/搭檔關鍵字</label>
         <input class="card-input" type="text" id="cardSearch"
           placeholder="如：逐光、0階逐光、終末之神"
           oninput="applyFilters()">
