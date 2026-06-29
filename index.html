@@ -1771,8 +1771,8 @@ function switchFolderTab(tab) {
 }
 
 function clearFolderTab() {
-  const target = activeFolderTab === 'favorites' ? '收藏' : '瀏覽記錄';
-  if (!confirm(`是否確認刪除資料：${target}`)) return;
+  const target = activeFolderTab === 'favorites' ? '【收藏】資料' : '【瀏覽記錄】資料';
+  if (!confirm(`以下操作將無法復原，是否確認刪除：${target}`)) return;
   localFolder[activeFolderTab] = [];
   saveLocalFolder();
   renderCards();
