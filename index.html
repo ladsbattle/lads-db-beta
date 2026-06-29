@@ -1073,20 +1073,20 @@ select.card-input option {
           <option value="冥羅之主">夏以晝．冥羅之主</option>
           <option value="夜行狼王">敖尹．夜行狼王</option>
         </select>
-      </div>
-      <div class="filter-group card-group">
-        <label>日卡關鍵字（非必填）</label>
-        <input class="card-input" type="text" id="endlessCardSearch"
-          placeholder="如：3階逐光、2階夜誓…"
-          oninput="applyEndlessFilters()">
-      </div>
+     </div>
       <div class="filter-group video-group">
         <label>影片狀態</label>
         <label class="video-toggle">
           <input type="checkbox" id="endlessVideoOnly" onchange="applyEndlessFilters()">
           <span class="video-switch"></span>
           <span>僅看附影片</span>
-        </label>
+        </label>   
+      </div>
+      <div class="filter-group card-group">
+        <label>日卡關鍵字</label>
+        <input class="card-input" type="text" id="endlessCardSearch"
+          placeholder="如：3階逐光、2階夜誓…"
+          oninput="applyEndlessFilters()">
       </div>
     </div>
   </div>
