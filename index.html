@@ -201,11 +201,8 @@ header {
   margin-top: 0;
 }
 .endless-filter-fields .partner-group,
-.endless-filter-fields .card-group {
+.endless-filter-fields .video-group {
   min-width: 0;
-}
-.endless-filter-panel .filter-group.card-group {
-  flex: 1 1 240px;
 }
 .endless-filter-panel .filter-group.video-group {
   flex: 0 1 170px;
@@ -424,6 +421,9 @@ header {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+}
+.dynamic-filter-grid.single-column {
+  grid-template-columns: 1fr;
 }
 .dynamic-layer-box {
   background: rgba(255,255,255,0.025);
@@ -1175,12 +1175,20 @@ select.card-input option {
           <span>僅看附影片</span>
         </label>   
       </div>
-      <div class="filter-group card-group">
-        <label>日卡關鍵字</label>
-        <input class="card-input" type="text" id="endlessCardSearch"
-          placeholder="如：3階逐光、2階夜誓…"
-          oninput="applyEndlessFilters()">
+    </div>
+
+    <div class="dynamic-filter-panel" id="endlessDynamicFilterPanel">
+      <div class="dynamic-filter-header">
+        <div class="dynamic-filter-title">✦ 日卡篩選</div>
+        <button class="btn-reset btn-reset-compact" onclick="clearEndlessDynamicFilters()">清除條件</button>
       </div>
+      <div class="dynamic-filter-grid single-column">
+        <div class="dynamic-layer-box">
+          <div class="dynamic-layer-title">日卡選擇</div>
+          <div class="dynamic-chip-row" id="endlessCardChips"></div>
+        </div>
+      </div>
+      <div class="dynamic-no-match" id="endlessDynamicNoMatch">找不到完全相符的結果，建議嘗試其他日卡或搭檔</div>
     </div>
   </div>
 
@@ -1221,6 +1229,7 @@ let ENDLESS_DATA = [];
 let ENDLESS_ALL = [];
 let activeOrbit = null;
 let activePartner = null;
+let activeEndlessCard = null;
 let layerOK = true;
 let currentData = [];
 let activeLayerFilters = { upper: [], lower: [] };
@@ -1601,27 +1610,74 @@ function switchTab(tab, btn) {
 
 function selectPartnerDropdown(value) {
   activePartner = value || null;
+  activeEndlessCard = null;
+  applyEndlessFilters();
+}
+
+function collectEndlessCardOptions(data) {
+  const cardMap = new Map();
+  data.forEach(d => addOption(cardMap, 'card', d.card));
+  return [...cardMap.values()].sort(sortCardsByRank);
+}
+
+function renderEndlessDynamicFilters(baseData) {
+  const panel = document.getElementById('endlessDynamicFilterPanel');
+  const chips = document.getElementById('endlessCardChips');
+  const noMatch = document.getElementById('endlessDynamicNoMatch');
+  if (!panel || !chips) return;
+  const shouldShow = Boolean(activePartner);
+  panel.classList.toggle('show', shouldShow);
+  if (!shouldShow) {
+    activeEndlessCard = null;
+    if (noMatch) noMatch.classList.remove('show');
+    return;
+  }
+
+  const options = collectEndlessCardOptions(baseData);
+  if (options.length === 0) {
+    chips.innerHTML = '<span class="dynamic-empty">目前無可用日卡</span>';
+    return;
+  }
+  chips.innerHTML = options.map(option => `
+    <button class="dynamic-chip ${activeEndlessCard === option.value ? 'active' : ''}"
+      data-value="${escapeHtml(option.value)}"
+      onclick="toggleEndlessCardFilter(this.dataset.value)">
+      ${escapeHtml(option.label)}
+    </button>
+  `).join('');
+}
+
+function toggleEndlessCardFilter(value) {
+  activeEndlessCard = activeEndlessCard === value ? null : value;
+  applyEndlessFilters();
+}
+
+function clearEndlessDynamicFilters() {
+  activeEndlessCard = null;
   applyEndlessFilters();
 }
 
 function applyEndlessFilters() {
-  const kw = document.getElementById('endlessCardSearch').value.trim();
   const videoOnly = document.getElementById('endlessVideoOnly').checked;
-  ENDLESS_DATA = ENDLESS_ALL.filter(d => {
+  const baseData = ENDLESS_ALL.filter(d => {
     if (activePartner && d.partner !== activePartner) return false;
     if (videoOnly && !d.hasVideo) return false;
-    if (kw && !d.card.includes(kw)) return false;
     return true;
   });
+  renderEndlessDynamicFilters(baseData);
+  ENDLESS_DATA = baseData.filter(d => !activeEndlessCard || d.card === activeEndlessCard);
+  const noMatch = document.getElementById('endlessDynamicNoMatch');
+  if (noMatch) noMatch.classList.toggle('show', Boolean(activeEndlessCard) && ENDLESS_DATA.length === 0);
   renderEndless();
 }
 
 function resetEndlessFilters() {
   activePartner = null;
+  activeEndlessCard = null;
   document.getElementById('partnerSelect').value = '';
-  document.getElementById('endlessCardSearch').value = '';
   document.getElementById('endlessVideoOnly').checked = false;
   ENDLESS_DATA = [...ENDLESS_ALL];
+  renderEndlessDynamicFilters(ENDLESS_DATA);
   renderEndless();
 }
 
