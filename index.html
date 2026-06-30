@@ -1895,7 +1895,7 @@ function renderFolderPanel() {
   const items = localFolder[activeFolderTab] || [];
   clearBtn.disabled = items.length === 0;
   if (items.length === 0) {
-    list.innerHTML = `<div class="folder-empty">${activeFolderTab === 'favorites' ? '尚未收藏任何資料' : '尚無瀏覽記錄'}</div>`;
+    list.innerHTML = `<div class="folder-empty">${activeFolderTab === 'favorites' ? '尚無收藏' : '尚無瀏覽記錄'}</div>`;
     return;
   }
   list.innerHTML = items.map(item => {
