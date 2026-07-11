@@ -779,6 +779,21 @@ header {
   line-height: 1.8;
   color: var(--text-muted);
 }
+.empty-state-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+.empty-state-sync .loading-spinner {
+  width: 0.66rem;
+  height: 0.66rem;
+  border-width: 1.2px;
+  opacity: 0.82;
+}
 
 /* Modal */
 .modal-overlay {
@@ -1737,7 +1752,7 @@ function loadingMarkup() {
   return '<span class="loading-inline"><span class="loading-spinner"></span><span class="loading-text">資料載入中…</span></span>';
 }
 
-function emptyStateMarkup(title, body) {
+function emptyStateMarkup(title, body, syncText = '') {
   return `
     <div class="empty-state" style="grid-column:1/-1">
       <div class="empty-state-icon" aria-hidden="true">
@@ -1747,6 +1762,7 @@ function emptyStateMarkup(title, body) {
       </div>
       <div class="empty-state-title">${escapeHtml(title)}</div>
       <p>${escapeHtml(body)}</p>
+      ${syncText ? `<div class="empty-state-sync"><span class="loading-spinner"></span><span>${escapeHtml(syncText)}</span></div>` : ''}
     </div>
   `;
 }
@@ -2447,7 +2463,8 @@ function renderCards() {
   const grid = document.getElementById('cardsGrid');
   if (!panelQueryStarted()) {
     document.getElementById('resultsInfo').innerHTML = '';
-    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。');
+    const syncText = panelDataLoaded || panelDataLoadFailed ? '' : '資料同步中…';
+    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。', syncText);
     updateScrollButtons();
     return;
   }
