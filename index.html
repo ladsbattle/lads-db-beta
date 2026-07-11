@@ -744,7 +744,7 @@ header {
 /* Empty state */
 .empty-state {
   text-align: center;
-  padding: 3.25rem 1rem;
+  padding: 2.45rem 1rem 2.6rem;
   color: var(--text-dim);
   background: rgba(13,21,38,0.42);
   border: 1px solid rgba(150,180,240,0.16);
@@ -753,7 +753,7 @@ header {
 .empty-state-icon {
   width: 2.8rem;
   height: 2.8rem;
-  margin: 0 auto 0.9rem;
+  margin: 0 auto 0.8rem;
   border-radius: 50%;
   border: 1px solid rgba(184,212,255,0.28);
   background: rgba(184,212,255,0.07);
@@ -772,7 +772,7 @@ header {
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0.08em;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
 }
 .empty-state p {
   font-size: 0.82rem;
@@ -782,17 +782,37 @@ header {
 .empty-state-sync {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.9rem;
-  color: var(--text-dim);
-  font-size: 0.72rem;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 8.8rem;
+  min-height: 1.8rem;
+  margin: 0 auto 1.05rem;
+  padding: 0.34rem 0.78rem;
+  border-radius: 999px;
+  border: 1px solid rgba(184,212,255,0.18);
+  background: rgba(184,212,255,0.055);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 500;
   letter-spacing: 0.06em;
+  line-height: 1;
 }
 .empty-state-sync .loading-spinner {
   width: 0.66rem;
   height: 0.66rem;
   border-width: 1.2px;
   opacity: 0.82;
+}
+.empty-state-check {
+  width: 0.66rem;
+  height: 0.66rem;
+  color: #cfe8d8;
+  flex-shrink: 0;
+}
+.empty-state-sync.is-done {
+  border-color: rgba(117,210,157,0.22);
+  background: rgba(117,210,157,0.075);
+  color: #cfe8d8;
 }
 
 /* Modal */
@@ -1752,9 +1772,22 @@ function loadingMarkup() {
   return '<span class="loading-inline"><span class="loading-spinner"></span><span class="loading-text">資料載入中…</span></span>';
 }
 
-function emptyStateMarkup(title, body, syncText = '') {
+function syncStateMarkup() {
+  const done = panelDataLoaded && !panelDataLoadFailed;
+  return `
+    <div class="empty-state-sync ${done ? 'is-done' : ''}">
+      ${done
+        ? '<svg class="empty-state-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
+        : '<span class="loading-spinner"></span>'}
+      <span>${done ? '資料同步完成' : '資料同步中'}</span>
+    </div>
+  `;
+}
+
+function emptyStateMarkup(title, body, showSyncState = false) {
   return `
     <div class="empty-state" style="grid-column:1/-1">
+      ${showSyncState ? syncStateMarkup() : ''}
       <div class="empty-state-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M12 5v14M5 12h14"/>
@@ -1762,7 +1795,6 @@ function emptyStateMarkup(title, body, syncText = '') {
       </div>
       <div class="empty-state-title">${escapeHtml(title)}</div>
       <p>${escapeHtml(body)}</p>
-      ${syncText ? `<div class="empty-state-sync"><span class="loading-spinner"></span><span>${escapeHtml(syncText)}</span></div>` : ''}
     </div>
   `;
 }
@@ -2463,8 +2495,7 @@ function renderCards() {
   const grid = document.getElementById('cardsGrid');
   if (!panelQueryStarted()) {
     document.getElementById('resultsInfo').innerHTML = '';
-    const syncText = panelDataLoaded || panelDataLoadFailed ? '' : '資料同步中…';
-    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。', syncText);
+    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。', !panelDataLoadFailed);
     updateScrollButtons();
     return;
   }
