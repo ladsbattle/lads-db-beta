@@ -744,28 +744,11 @@ header {
 /* Empty state */
 .empty-state {
   text-align: center;
-  padding: 2.45rem 1rem 2.6rem;
+  padding: 2.25rem 1rem 2.35rem;
   color: var(--text-dim);
   background: rgba(13,21,38,0.42);
   border: 1px solid rgba(150,180,240,0.16);
   border-radius: 12px;
-}
-.empty-state-icon {
-  width: 2.8rem;
-  height: 2.8rem;
-  margin: 0 auto 0.8rem;
-  border-radius: 50%;
-  border: 1px solid rgba(184,212,255,0.28);
-  background: rgba(184,212,255,0.07);
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 18px rgba(184,212,255,0.08);
-}
-.empty-state-icon svg {
-  width: 1.25rem;
-  height: 1.25rem;
 }
 .empty-state-title {
   color: var(--text);
@@ -1788,11 +1771,6 @@ function emptyStateMarkup(title, body, showSyncState = false) {
   return `
     <div class="empty-state" style="grid-column:1/-1">
       ${showSyncState ? syncStateMarkup() : ''}
-      <div class="empty-state-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-      </div>
       <div class="empty-state-title">${escapeHtml(title)}</div>
       <p>${escapeHtml(body)}</p>
     </div>
