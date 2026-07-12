@@ -797,6 +797,43 @@ header {
   background: rgba(117,210,157,0.075);
   color: #cfe8d8;
 }
+.panel-prompt-line {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  line-height: 1.7;
+}
+.panel-prompt-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.panel-prompt-status.is-done {
+  color: #cfe8d8;
+}
+.panel-prompt-status.is-failed {
+  color: #f8caca;
+}
+.panel-prompt-line .loading-spinner,
+.panel-prompt-check {
+  width: 0.72rem;
+  height: 0.72rem;
+  flex-shrink: 0;
+}
+.panel-prompt-line .loading-spinner {
+  border-width: 1.2px;
+}
+.panel-prompt-separator {
+  color: var(--text-dim);
+}
 
 /* Modal */
 .modal-overlay {
@@ -1777,6 +1814,31 @@ function emptyStateMarkup(title, body, showSyncState = false) {
   `;
 }
 
+function panelPromptMarkup() {
+  if (panelDataLoadFailed) {
+    return `
+      <div class="panel-prompt-line">
+        <span class="panel-prompt-status is-failed">⚠ 資料同步失敗</span>
+        <span class="panel-prompt-separator">·</span>
+        <span>請重新整理頁面</span>
+      </div>
+    `;
+  }
+  const done = panelDataLoaded && !panelDataLoadFailed;
+  return `
+    <div class="panel-prompt-line">
+      <span class="panel-prompt-status ${done ? 'is-done' : ''}">
+        ${done
+          ? '<svg class="panel-prompt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
+          : '<span class="loading-spinner"></span>'}
+        <span>${done ? '資料同步完成' : '資料同步中'}</span>
+      </span>
+      <span class="panel-prompt-separator">·</span>
+      <span>請選擇軌道類型並輸入層數</span>
+    </div>
+  `;
+}
+
 function panelQueryStarted() {
   const layerVal = document.getElementById('layerInput')?.value.trim() || '';
   const layerNum = layerVal !== '' ? parseInt(layerVal, 10) : null;
@@ -2473,7 +2535,7 @@ function renderCards() {
   const grid = document.getElementById('cardsGrid');
   if (!panelQueryStarted()) {
     document.getElementById('resultsInfo').innerHTML = '';
-    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。', !panelDataLoadFailed);
+    grid.innerHTML = panelPromptMarkup();
     updateScrollButtons();
     return;
   }
