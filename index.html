@@ -466,6 +466,10 @@ header {
   border-top: 1px solid var(--border);
 }
 .dynamic-filter-panel.show { display: block; }
+.dynamic-filter-panel.is-placeholder .dynamic-filter-grid,
+.dynamic-filter-panel.is-placeholder .dynamic-no-match {
+  display: none;
+}
 .dynamic-filter-header {
   display: flex;
   align-items: center;
@@ -477,6 +481,58 @@ header {
   font-size: 0.82rem;
   color: var(--text-muted);
   letter-spacing: 0.25em;
+}
+.dynamic-filter-placeholder {
+  display: none;
+  padding: 0.95rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(184,212,255,0.08);
+  background: rgba(255,255,255,0.018);
+}
+.dynamic-filter-panel.is-placeholder .dynamic-filter-placeholder {
+  display: block;
+}
+.dynamic-filter-panel.is-placeholder .dynamic-clear-btn {
+  visibility: hidden;
+}
+.dynamic-placeholder-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.35rem;
+  margin-bottom: 0.55rem;
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.dynamic-placeholder-status.is-done {
+  color: #cfe8d8;
+}
+.dynamic-placeholder-status.is-failed {
+  color: #f8caca;
+}
+.dynamic-placeholder-status .loading-spinner,
+.dynamic-placeholder-status svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  flex-shrink: 0;
+}
+.dynamic-placeholder-status .loading-spinner {
+  border-width: 1.2px;
+}
+.dynamic-placeholder-title {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+.dynamic-placeholder-text {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.75;
+  letter-spacing: 0.04em;
 }
 .dynamic-filter-grid {
   display: grid;
@@ -1634,11 +1690,12 @@ select.card-input option {
       </div>
     </div>
 
-    <div class="dynamic-filter-panel" id="dynamicFilterPanel">
+    <div class="dynamic-filter-panel show is-placeholder" id="dynamicFilterPanel">
       <div class="dynamic-filter-header">
         <div class="dynamic-filter-title">✦ 配置篩選</div>
-        <button class="btn-reset btn-reset-compact" onclick="clearDynamicFilters()">清除配置</button>
+        <button class="btn-reset btn-reset-compact dynamic-clear-btn" onclick="clearDynamicFilters()">清除配置</button>
       </div>
+      <div class="dynamic-filter-placeholder" id="dynamicFilterPlaceholder"></div>
       <div class="dynamic-filter-grid">
         <div class="dynamic-layer-box">
           <div class="dynamic-layer-title">▲ 上層</div>
@@ -1836,6 +1893,27 @@ function panelPromptMarkup() {
       <span class="panel-prompt-separator">·</span>
       <span>請選擇軌道類型並輸入層數</span>
     </div>
+  `;
+}
+
+function panelConfigPromptMarkup() {
+  if (panelDataLoadFailed) {
+    return `
+      <div class="dynamic-placeholder-status is-failed">⚠ 資料同步失敗</div>
+      <div class="dynamic-placeholder-title">請重新整理頁面</div>
+      <div class="dynamic-placeholder-text">資料未能成功載入，暫時無法顯示結果或進階篩選選項。</div>
+    `;
+  }
+  const done = panelDataLoaded && !panelDataLoadFailed;
+  return `
+    <div class="dynamic-placeholder-status ${done ? 'is-done' : ''}">
+      ${done
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
+        : '<span class="loading-spinner"></span>'}
+      <span>${done ? '資料同步完成' : '資料同步中'}</span>
+    </div>
+    <div class="dynamic-placeholder-title">請選擇軌道類型並輸入層數</div>
+    <div class="dynamic-placeholder-text">系統會依照資料庫現有內容，顯示結果或進階篩選選項。</div>
   `;
 }
 
@@ -2460,15 +2538,19 @@ function renderDynamicFilterSide(side, options) {
 
 function renderDynamicFilters(baseData, layerNum) {
   const panel = document.getElementById('dynamicFilterPanel');
+  const placeholder = document.getElementById('dynamicFilterPlaceholder');
   const noMatch = document.getElementById('dynamicNoMatch');
   if (!panel) return;
   const shouldShow = activeOrbit && layerNum !== null && layerOK;
-  panel.classList.toggle('show', shouldShow);
-  if (!shouldShow) {
+  panel.classList.add('show');
+  panel.classList.toggle('is-placeholder', !shouldShow || !panelDataLoaded || panelDataLoadFailed);
+  if (!shouldShow || !panelDataLoaded || panelDataLoadFailed) {
     activeLayerFilters = { upper: [], lower: [] };
+    if (placeholder) placeholder.innerHTML = panelConfigPromptMarkup();
     if (noMatch) noMatch.classList.remove('show');
     return;
   }
+  if (placeholder) placeholder.innerHTML = '';
   renderDynamicFilterSide('upper', collectLayerOptions(baseData, 'upper'));
   renderDynamicFilterSide('lower', collectLayerOptions(baseData, 'lower'));
 }
@@ -2535,12 +2617,14 @@ function renderCards() {
   const grid = document.getElementById('cardsGrid');
   if (!panelQueryStarted()) {
     document.getElementById('resultsInfo').innerHTML = '';
-    grid.innerHTML = panelPromptMarkup();
+    renderDynamicFilters([], null);
+    grid.innerHTML = '';
     updateScrollButtons();
     return;
   }
   if (panelDataLoadFailed) {
     document.getElementById('resultsInfo').innerHTML = '⚠ 資料載入失敗，請重新整理頁面';
+    renderDynamicFilters([], null);
     grid.innerHTML = '';
     updateScrollButtons();
     return;
