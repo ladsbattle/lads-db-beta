@@ -150,16 +150,17 @@ header {
   background: linear-gradient(90deg, transparent, rgba(184,212,255,0.34), transparent);
 }
 .loading-stage {
-  position: relative;
-  z-index: 10;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: grid;
   place-items: center;
   min-height: clamp(220px, 36vh, 390px);
-  max-height: 430px;
   padding: 1.5rem;
   overflow: hidden;
   opacity: 1;
-  transition: opacity 0.72s ease, min-height 0.72s ease, max-height 0.72s ease, padding 0.72s ease;
+  transition: opacity 0.72s ease, visibility 0.72s ease;
 }
 .loading-stage-inner {
   display: inline-flex;
@@ -191,11 +192,8 @@ header {
   animation: none;
 }
 body.app-ready .loading-stage {
-  min-height: 0;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
@@ -1239,14 +1237,11 @@ body.app-ready .loading-stage {
   font-weight: 500;
 }
 .query-shell {
-  max-height: 0;
-  overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.72s ease, max-height 0.72s ease;
+  transition: opacity 0.72s ease;
 }
 body.app-ready .query-shell {
-  max-height: 5000px;
   opacity: 1;
   pointer-events: auto;
 }
@@ -1597,7 +1592,6 @@ select.card-input option {
   }
   .loading-stage {
     min-height: clamp(160px, 28vh, 260px);
-    max-height: 280px;
     padding: 1rem;
   }
   .local-folder-panel {
