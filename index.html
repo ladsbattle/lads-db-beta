@@ -146,8 +146,41 @@ header {
 .title-divider {
   width: min(9.5rem, 34vw);
   height: 1px;
-  margin-top: 1.1rem;
+  margin-top: 0.75rem;
   background: linear-gradient(90deg, transparent, rgba(184,212,255,0.34), transparent);
+}
+.header-sync-status {
+  min-height: 1.45rem;
+  margin-top: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+.header-sync-status.is-done {
+  color: #cfe8d8;
+}
+.header-sync-status.is-failed {
+  color: #f8caca;
+}
+.header-sync-status.is-hidden {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+.header-sync-status .loading-spinner,
+.header-sync-status svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  flex-shrink: 0;
+}
+.header-sync-status .loading-spinner {
+  border-width: 1.2px;
 }
 
 .info-button {
@@ -1189,6 +1222,18 @@ header {
   color: var(--text);
   font-weight: 500;
 }
+.query-shell {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+body.app-ready .query-shell {
+  opacity: 1;
+  transform: translateY(0);
+}
+body:not(.app-ready) .query-shell {
+  display: none;
+}
 
 /* ── Section visibility ── */
 .section { display: none; }
@@ -1633,9 +1678,14 @@ select.card-input option {
     <div class="site-title">面板資料庫</div>
     <button class="info-button" onclick="openInfoModal()" aria-label="查看資料庫資訊" title="查看資料庫資訊">i</button>
   </div>
+  <div class="header-sync-status" id="headerSyncStatus">
+    <span class="loading-spinner"></span>
+    <span>資料同步中</span>
+  </div>
   <div class="title-divider" aria-hidden="true"></div>
 </header>
 
+<div class="query-shell" id="queryShell">
 <!-- Tab navigation -->
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('panel', this)">軌道</button>
@@ -1779,6 +1829,7 @@ select.card-input option {
   <div class="endless-grid" id="endlessGrid"></div>
 </div>
 </div><!-- end section-endless -->
+</div>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
@@ -1847,6 +1898,32 @@ const LOCAL_FOLDER_KEY = 'ladsbattle_local_folder_v1';
 
 function loadingMarkup() {
   return '<span class="loading-inline"><span class="loading-spinner"></span><span class="loading-text">資料載入中…</span></span>';
+}
+
+function setHeaderSyncStatus(state) {
+  const el = document.getElementById('headerSyncStatus');
+  if (!el) return;
+  el.classList.remove('is-done', 'is-failed', 'is-hidden');
+  if (state === 'done') {
+    el.classList.add('is-done');
+    el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span>資料同步完成</span>';
+    return;
+  }
+  if (state === 'failed') {
+    el.classList.add('is-failed');
+    el.innerHTML = '<span>⚠ 資料同步失敗，請稍後再試</span>';
+    return;
+  }
+  el.innerHTML = '<span class="loading-spinner"></span><span>資料同步中</span>';
+}
+
+function revealQueryShell(delay = 0, hideStatus = true) {
+  window.setTimeout(() => {
+    document.body.classList.add('app-ready');
+    const el = document.getElementById('headerSyncStatus');
+    if (hideStatus && el) el.classList.add('is-hidden');
+    updateScrollButtons();
+  }, delay);
 }
 
 function syncStateMarkup() {
@@ -2016,6 +2093,7 @@ async function init() {
   const SHEET_FILE_ID = '19RqMAlpyi1g9pXyJ1azm45pxfjvxRqxJOUCdsQpHKDo';
   const DRIVE_API_KEY = 'AIzaSyAzbzHaKnhio4gomMkPm-lppgkDpBj6TIw';
 
+  setHeaderSyncStatus('loading');
   renderCards();
   document.getElementById('endlessInfo').innerHTML = loadingMarkup();
 
@@ -2026,10 +2104,14 @@ async function init() {
     panelDataLoaded = true;
     panelDataLoadFailed = false;
     applyFilters();
+    setHeaderSyncStatus('done');
+    revealQueryShell(1200);
   } catch (err) {
     panelDataLoaded = false;
     panelDataLoadFailed = true;
     applyFilters();
+    setHeaderSyncStatus('failed');
+    revealQueryShell(0, false);
     console.error(err);
   }
 
@@ -2542,9 +2624,15 @@ function renderDynamicFilters(baseData, layerNum) {
   const noMatch = document.getElementById('dynamicNoMatch');
   if (!panel) return;
   const shouldShow = activeOrbit && layerNum !== null && layerOK;
-  panel.classList.add('show');
-  panel.classList.toggle('is-placeholder', !shouldShow || !panelDataLoaded || panelDataLoadFailed);
-  if (!shouldShow || !panelDataLoaded || panelDataLoadFailed) {
+  panel.classList.toggle('show', shouldShow);
+  panel.classList.toggle('is-placeholder', shouldShow && (!panelDataLoaded || panelDataLoadFailed));
+  if (!shouldShow) {
+    activeLayerFilters = { upper: [], lower: [] };
+    if (placeholder) placeholder.innerHTML = '';
+    if (noMatch) noMatch.classList.remove('show');
+    return;
+  }
+  if (!panelDataLoaded || panelDataLoadFailed) {
     activeLayerFilters = { upper: [], lower: [] };
     if (placeholder) placeholder.innerHTML = panelConfigPromptMarkup();
     if (noMatch) noMatch.classList.remove('show');
