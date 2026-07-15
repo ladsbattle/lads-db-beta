@@ -149,38 +149,54 @@ header {
   margin-top: 0.75rem;
   background: linear-gradient(90deg, transparent, rgba(184,212,255,0.34), transparent);
 }
-.header-sync-status {
-  min-height: 1.45rem;
-  margin-top: 0.45rem;
+.loading-stage {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  min-height: clamp(220px, 36vh, 390px);
+  padding: 1.5rem;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s ease, transform 0.8s ease, min-height 0.8s ease, padding 0.8s ease;
+}
+.loading-stage-inner {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  color: var(--accent);
-  font-size: 0.76rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  gap: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
 }
-.header-sync-status.is-done {
-  color: #cfe8d8;
+.loading-stage-spinner {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 50%;
+  border: 1px solid rgba(184,212,255,0.18);
+  border-top-color: rgba(220,235,255,0.82);
+  border-right-color: rgba(184,212,255,0.42);
+  box-shadow: 0 0 26px rgba(184,212,255,0.16);
+  animation: loadingSpin 0.95s linear infinite;
 }
-.header-sync-status.is-failed {
+.loading-stage-text {
+  font-size: 0.78rem;
+  animation: loadingBreath 1.7s ease-in-out infinite;
+}
+.loading-stage.is-failed .loading-stage-spinner {
+  display: none;
+}
+.loading-stage.is-failed .loading-stage-text {
   color: #f8caca;
+  animation: none;
 }
-.header-sync-status.is-hidden {
+body.app-ready .loading-stage {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateY(-8px);
   pointer-events: none;
-}
-.header-sync-status .loading-spinner,
-.header-sync-status svg {
-  width: 0.72rem;
-  height: 0.72rem;
-  flex-shrink: 0;
-}
-.header-sync-status .loading-spinner {
-  border-width: 1.2px;
 }
 
 .info-button {
@@ -1224,15 +1240,14 @@ header {
 }
 .query-shell {
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.32s ease, transform 0.32s ease;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.62s ease, transform 0.62s ease;
 }
 body.app-ready .query-shell {
   opacity: 1;
   transform: translateY(0);
-}
-body:not(.app-ready) .query-shell {
-  display: none;
+  pointer-events: auto;
 }
 
 /* ── Section visibility ── */
@@ -1678,12 +1693,15 @@ select.card-input option {
     <div class="site-title">面板資料庫</div>
     <button class="info-button" onclick="openInfoModal()" aria-label="查看資料庫資訊" title="查看資料庫資訊">i</button>
   </div>
-  <div class="header-sync-status" id="headerSyncStatus">
-    <span class="loading-spinner"></span>
-    <span>資料同步中</span>
-  </div>
   <div class="title-divider" aria-hidden="true"></div>
 </header>
+
+<div class="loading-stage" id="loadingStage">
+  <div class="loading-stage-inner">
+    <div class="loading-stage-spinner" aria-hidden="true"></div>
+    <div class="loading-stage-text" id="loadingStageText">資料載入中…</div>
+  </div>
+</div>
 
 <div class="query-shell" id="queryShell">
 <!-- Tab navigation -->
@@ -1900,28 +1918,17 @@ function loadingMarkup() {
   return '<span class="loading-inline"><span class="loading-spinner"></span><span class="loading-text">資料載入中…</span></span>';
 }
 
-function setHeaderSyncStatus(state) {
-  const el = document.getElementById('headerSyncStatus');
-  if (!el) return;
-  el.classList.remove('is-done', 'is-failed', 'is-hidden');
-  if (state === 'done') {
-    el.classList.add('is-done');
-    el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span>資料同步完成</span>';
-    return;
-  }
-  if (state === 'failed') {
-    el.classList.add('is-failed');
-    el.innerHTML = '<span>⚠ 資料同步失敗，請稍後再試</span>';
-    return;
-  }
-  el.innerHTML = '<span class="loading-spinner"></span><span>資料同步中</span>';
+function setLoadingStage(state) {
+  const stage = document.getElementById('loadingStage');
+  const text = document.getElementById('loadingStageText');
+  if (!stage || !text) return;
+  stage.classList.toggle('is-failed', state === 'failed');
+  text.textContent = state === 'failed' ? '資料載入失敗，請稍後再試' : '資料載入中…';
 }
 
-function revealQueryShell(delay = 0, hideStatus = true) {
+function revealQueryShell(delay = 0) {
   window.setTimeout(() => {
     document.body.classList.add('app-ready');
-    const el = document.getElementById('headerSyncStatus');
-    if (hideStatus && el) el.classList.add('is-hidden');
     updateScrollButtons();
   }, delay);
 }
@@ -2093,7 +2100,7 @@ async function init() {
   const SHEET_FILE_ID = '19RqMAlpyi1g9pXyJ1azm45pxfjvxRqxJOUCdsQpHKDo';
   const DRIVE_API_KEY = 'AIzaSyAzbzHaKnhio4gomMkPm-lppgkDpBj6TIw';
 
-  setHeaderSyncStatus('loading');
+  setLoadingStage('loading');
   renderCards();
   document.getElementById('endlessInfo').innerHTML = loadingMarkup();
 
@@ -2104,14 +2111,13 @@ async function init() {
     panelDataLoaded = true;
     panelDataLoadFailed = false;
     applyFilters();
-    setHeaderSyncStatus('done');
-    revealQueryShell(1200);
+    revealQueryShell(260);
   } catch (err) {
     panelDataLoaded = false;
     panelDataLoadFailed = true;
     applyFilters();
-    setHeaderSyncStatus('failed');
-    revealQueryShell(0, false);
+    setLoadingStage('failed');
+    revealQueryShell(900);
     console.error(err);
   }
 
@@ -2706,7 +2712,7 @@ function renderCards() {
   if (!panelQueryStarted()) {
     document.getElementById('resultsInfo').innerHTML = '';
     renderDynamicFilters([], null);
-    grid.innerHTML = '';
+    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。');
     updateScrollButtons();
     return;
   }
