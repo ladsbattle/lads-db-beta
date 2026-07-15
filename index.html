@@ -120,7 +120,7 @@ header {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 3rem 1.5rem 1.2rem;
+  padding: 3rem 1.5rem 0.65rem;
 }
 
 .site-title {
@@ -155,11 +155,12 @@ header {
   display: grid;
   place-items: center;
   min-height: clamp(220px, 36vh, 390px);
+  max-height: 430px;
   padding: 1.5rem;
   overflow: hidden;
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.8s ease, transform 0.8s ease, min-height 0.8s ease, padding 0.8s ease;
+  transition: opacity 0.8s ease, transform 0.8s ease, min-height 0.8s ease, max-height 0.8s ease, padding 0.8s ease;
 }
 .loading-stage-inner {
   display: inline-flex;
@@ -192,6 +193,7 @@ header {
 }
 body.app-ready .loading-stage {
   min-height: 0;
+  max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
   opacity: 0;
@@ -1215,7 +1217,7 @@ body.app-ready .loading-stage {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.7rem 1rem 0;
+  padding: 0.35rem 1rem 0;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -1239,12 +1241,15 @@ body.app-ready .loading-stage {
   font-weight: 500;
 }
 .query-shell {
+  max-height: 0;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(12px);
   pointer-events: none;
-  transition: opacity 0.62s ease, transform 0.62s ease;
+  transition: opacity 0.62s ease, transform 0.62s ease, max-height 0.62s ease;
 }
 body.app-ready .query-shell {
+  max-height: 5000px;
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -1588,6 +1593,17 @@ select.card-input option {
 }
 
 @media (max-width: 600px) {
+  header {
+    padding-bottom: 0.55rem;
+  }
+  .title-divider {
+    margin-top: 0.55rem;
+  }
+  .loading-stage {
+    min-height: clamp(160px, 28vh, 260px);
+    max-height: 280px;
+    padding: 1rem;
+  }
   .local-folder-panel {
     right: 1rem;
     top: 3.85rem;
@@ -1679,7 +1695,7 @@ select.card-input option {
   .endless-grid { grid-template-columns: 1fr; }
 
   /* tab nav fits smaller screens */
-  .tab-nav { gap: 0.35rem; padding: 0.65rem 0.75rem 0; }
+  .tab-nav { gap: 0.35rem; padding: 0.3rem 0.75rem 0; }
   .tab-btn { font-size: 0.75rem; padding: 0.4rem 1rem; }
 }
 
@@ -1923,7 +1939,7 @@ function setLoadingStage(state) {
   const text = document.getElementById('loadingStageText');
   if (!stage || !text) return;
   stage.classList.toggle('is-failed', state === 'failed');
-  text.textContent = state === 'failed' ? '資料載入失敗，請稍後再試' : '資料載入中…';
+  text.textContent = state === 'failed' ? '資料載入失敗，請重新整理頁面' : '資料載入中…';
 }
 
 function revealQueryShell(delay = 0) {
@@ -2117,7 +2133,6 @@ async function init() {
     panelDataLoadFailed = true;
     applyFilters();
     setLoadingStage('failed');
-    revealQueryShell(900);
     console.error(err);
   }
 
