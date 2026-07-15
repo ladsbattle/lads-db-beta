@@ -159,8 +159,7 @@ header {
   padding: 1.5rem;
   overflow: hidden;
   opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.8s ease, transform 0.8s ease, min-height 0.8s ease, max-height 0.8s ease, padding 0.8s ease;
+  transition: opacity 0.72s ease, min-height 0.72s ease, max-height 0.72s ease, padding 0.72s ease;
 }
 .loading-stage-inner {
   display: inline-flex;
@@ -197,7 +196,6 @@ body.app-ready .loading-stage {
   padding-top: 0;
   padding-bottom: 0;
   opacity: 0;
-  transform: translateY(-8px);
   pointer-events: none;
 }
 
@@ -1244,14 +1242,12 @@ body.app-ready .loading-stage {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transform: translateY(12px);
   pointer-events: none;
-  transition: opacity 0.62s ease, transform 0.62s ease, max-height 0.62s ease;
+  transition: opacity 0.72s ease, max-height 0.72s ease;
 }
 body.app-ready .query-shell {
   max-height: 5000px;
   opacity: 1;
-  transform: translateY(0);
   pointer-events: auto;
 }
 
