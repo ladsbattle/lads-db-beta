@@ -3079,6 +3079,12 @@ function setPanelResultsContent(stateKey, infoHtml, gridHtml) {
 function renderCards() {
   if (!panelQueryStarted()) {
     renderDynamicFilters([], null);
+    const grid = document.getElementById('cardsGrid');
+    const promptOverviewReady = panelDataLoaded && !panelDataLoadFailed && DATA.length > 0;
+    if (panelRenderStateKey === 'prompt' && promptOverviewReady && grid?.querySelector('.db-glance')) {
+      updateScrollButtons();
+      return;
+    }
     setPanelResultsContent('prompt', '', panelInitialStateMarkup());
     return;
   }
