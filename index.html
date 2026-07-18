@@ -911,6 +911,10 @@ body.app-ready .loading-stage {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
 }
+.db-glance-head-count {
+  justify-content: center;
+  text-align: center;
+}
 .db-glance-count {
   color: var(--text);
   font-weight: 500;
@@ -942,7 +946,7 @@ body.app-ready .loading-stage {
 .sample-card {
   appearance: none;
   box-sizing: border-box;
-  min-width: 10.4rem;
+  min-width: 11.2rem;
   padding: 0.62rem 0.75rem;
   border: 1px solid rgba(150,180,240,0.16);
   border-radius: 8px;
@@ -967,16 +971,31 @@ body.app-ready .loading-stage {
   font-size: 0.75rem;
   font-weight: 500;
 }
-.sample-card-meta {
+.sample-orbit-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sample-top-meta {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+}
+.sample-layer-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.4rem;
   min-height: 1.1rem;
   margin-top: 0.45rem;
   color: var(--text-dim);
   font-size: 0.66rem;
 }
-.sample-card-note {
+.sample-layer-list.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.sample-layer-item {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1749,17 +1768,17 @@ select.card-input option {
 
   .filter-panel { padding: 1rem; }
   .filter-header { margin-bottom: 0.875rem; }
-  .filter-title { font-size: 0.76rem; letter-spacing: 0.2em; }
+  .filter-title { font-size: 0.86rem; letter-spacing: 0.18em; }
   .filter-hint {
-    margin: -0.2rem 0 0.85rem;
-    font-size: 0.64rem;
+    margin: -0.15rem 0 0.9rem;
+    font-size: 0.74rem;
     line-height: 1.6;
     letter-spacing: 0.03em;
   }
   .btn-reset-compact {
     gap: 0.25rem;
     padding: 0.25rem 0.65rem;
-    font-size: 0.68rem;
+    font-size: 0.76rem;
   }
   .filter-group,
   .endless-filter-panel .filter-group {
@@ -1767,7 +1786,7 @@ select.card-input option {
     min-width: 0 !important;
     max-width: none !important;
   }
-  .orbit-label { font-size: 0.66rem; margin-bottom: 0.5rem; }
+  .orbit-label { font-size: 0.76rem; margin-bottom: 0.55rem; }
   .orbit-chips {
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 0.44rem;
@@ -1775,9 +1794,9 @@ select.card-input option {
     margin-bottom: 1rem;
   }
   .chip {
-    padding: 0.5rem 0.25rem;
+    padding: 0.55rem 0.25rem;
     border-radius: 9px;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     white-space: nowrap;
   }
   .filter-fields {
@@ -1785,12 +1804,12 @@ select.card-input option {
     gap: 0.625rem;
     margin-top: 1rem;
   }
-  .filter-group label { font-size: 0.66rem; letter-spacing: 0.08em; }
+  .filter-group label { font-size: 0.76rem; letter-spacing: 0.08em; }
   .layer-input,
   .card-input {
-    --mobile-input-scale: 0.86;
+    --mobile-input-scale: 0.92;
     width: calc(100% / var(--mobile-input-scale));
-    height: calc(2rem / var(--mobile-input-scale));
+    height: calc(2.18rem / var(--mobile-input-scale));
     padding: 0.5rem 0.625rem;
     font-size: 16px;
     line-height: 1.2;
@@ -1799,13 +1818,13 @@ select.card-input option {
   }
   .layer-input::placeholder,
   .card-input::placeholder {
-    font-size: 0.88em;
+    font-size: 1em;
   }
   .video-toggle {
-    height: 2rem;
+    height: 2.18rem;
     padding: 0.5rem 0.625rem;
     gap: 0.375rem;
-    font-size: 0.75rem;
+    font-size: 0.92rem;
   }
   .video-switch {
     width: 28px;
@@ -1828,14 +1847,14 @@ select.card-input option {
   .layer-input,
   .card-input,
   select.card-input {
-    width: calc(100% / 0.86);
+    width: calc(100% / 0.92);
   }
   .cards-grid { grid-template-columns: 1fr; }
   .endless-grid { grid-template-columns: 1fr; }
 
   /* tab nav fits smaller screens */
   .tab-nav { gap: 0.35rem; padding: 0.3rem 0.75rem 0; }
-  .tab-btn { font-size: 0.75rem; padding: 0.4rem 1rem; }
+  .tab-btn { font-size: 0.88rem; padding: 0.45rem 1.05rem; }
   .empty-state {
     padding: 1.45rem 0.85rem 1.55rem;
   }
@@ -1860,14 +1879,14 @@ select.card-input option {
     gap: 0.12rem;
     text-align: center;
     margin-bottom: 0.55rem;
-    font-size: 0.6rem;
+    font-size: 0.72rem;
     line-height: 1.45;
     letter-spacing: 0.04em;
   }
   .db-glance-count {
     display: block;
     margin-top: 0;
-    font-size: 0.68rem;
+    font-size: 0.84rem;
     font-weight: 500;
     letter-spacing: 0.04em;
   }
@@ -1894,25 +1913,28 @@ select.card-input option {
     display: flex;
   }
   .sample-card {
-    flex: 0 0 7.85rem;
-    min-width: 7.85rem;
-    max-width: 7.85rem;
+    flex: 0 0 9.4rem;
+    min-width: 9.4rem;
+    max-width: 9.4rem;
     padding: 0.5rem 0.58rem;
     border-radius: 7px;
   }
   .sample-card-top {
     gap: 0.45rem;
-    font-size: 0.66rem;
+    font-size: 0.78rem;
   }
-  .sample-card-meta {
+  .sample-top-meta {
+    gap: 0.28rem;
+  }
+  .sample-layer-list {
     gap: 0.32rem;
     margin-top: 0.34rem;
     min-height: 0.95rem;
-    font-size: 0.58rem;
+    font-size: 0.68rem;
   }
   .sample-video-pill {
-    padding: 0.04rem 0.3rem;
-    font-size: 0.54rem;
+    padding: 0.04rem 0.32rem;
+    font-size: 0.62rem;
   }
 }
 
@@ -2135,6 +2157,7 @@ let ENDLESS_DATA = [];
 let ENDLESS_ALL = [];
 let panelDataLoaded = false;
 let panelDataLoadFailed = false;
+let panelSampleCache = [];
 let activeOrbit = null;
 let activePartner = null;
 let activeEndlessCard = null;
@@ -2191,34 +2214,43 @@ function emptyStateMarkup(title, body, showSyncState = false) {
   `;
 }
 
-function samplePanelNote(d) {
-  const candidates = [d.upperCard, d.lowerCard, d.upperPartner, d.lowerPartner]
-    .filter(value => value && value !== 'N/A');
-  return candidates[0] || '單層面板';
+function samplePanelLayerEntries(d) {
+  const entries = [];
+  if (d.upperCard && d.upperCard !== 'N/A') entries.push({ label: '▲', value: d.upperCard });
+  if (d.lowerCard && d.lowerCard !== 'N/A') entries.push({ label: '▼', value: d.lowerCard });
+  return entries;
 }
 
 function getRandomPanelSamples(count = 8) {
+  if (panelSampleCache.length > 0) return panelSampleCache.slice(0, count);
   const indexed = DATA.map((item, index) => ({ item, index }));
   for (let i = indexed.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
   }
-  return indexed.slice(0, Math.min(count, indexed.length));
+  panelSampleCache = indexed.slice(0, Math.min(count, indexed.length));
+  return panelSampleCache;
 }
 
 function panelSampleCardMarkup(sample) {
   const d = sample.item;
   const orbitLabel = ORBIT_LABEL[d.orbit] || d.orbit;
-  const note = samplePanelNote(d);
+  const layerEntries = samplePanelLayerEntries(d);
+  const layerClass = layerEntries.length <= 1 ? ' is-single' : '';
+  const layerHtml = layerEntries.length > 0
+    ? layerEntries.map(entry => `<span class="sample-layer-item">${entry.label} ${escapeHtml(entry.value)}</span>`).join('')
+    : '<span class="sample-layer-item">單層面板</span>';
   return `
     <button type="button" class="sample-card" onclick="openPanelSample(${sample.index})" aria-label="查看${escapeHtml(orbitLabel)}${escapeHtml(d.layer)}層資料">
       <div class="sample-card-top">
-        <span>${escapeHtml(orbitLabel)}</span>
-        <span>${escapeHtml(d.layer)} 層</span>
+        <span class="sample-orbit-name">${escapeHtml(orbitLabel)}</span>
+        <span class="sample-top-meta">
+          <span>${escapeHtml(d.layer)} 層</span>
+          ${d.hasVideo ? '<span class="sample-video-pill">影片</span>' : ''}
+        </span>
       </div>
-      <div class="sample-card-meta">
-        <span class="sample-card-note">${escapeHtml(note)}</span>
-        ${d.hasVideo ? '<span class="sample-video-pill">附影片</span>' : ''}
+      <div class="sample-layer-list${layerClass}">
+        ${layerHtml}
       </div>
     </button>
   `;
@@ -2231,8 +2263,7 @@ function panelGlanceMarkup() {
   const cards = samples.map(panelSampleCardMarkup).join('');
   return `
     <div class="db-glance">
-      <div class="db-glance-head">
-        <span>隨機看看資料庫裡的通關紀錄</span>
+      <div class="db-glance-head db-glance-head-count">
         <span class="db-glance-count">目前收錄軌道資料 ${DATA.length.toLocaleString('zh-TW')} 筆</span>
       </div>
       <div class="sample-marquee">
