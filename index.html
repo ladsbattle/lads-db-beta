@@ -849,6 +849,8 @@ body.app-ready .loading-stage {
 
 /* Empty state */
 .empty-state {
+  min-width: 0;
+  overflow: hidden;
   text-align: center;
   padding: 2.25rem 1rem 2.35rem;
   color: var(--text-dim);
@@ -870,7 +872,9 @@ body.app-ready .loading-stage {
 }
 .db-glance {
   margin: 1.45rem auto 0;
+  width: 100%;
   max-width: 760px;
+  min-width: 0;
   text-align: left;
 }
 .db-glance-head {
@@ -890,6 +894,8 @@ body.app-ready .loading-stage {
 }
 .sample-marquee {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   padding: 0.08rem 0;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
@@ -1801,45 +1807,79 @@ select.card-input option {
   .tab-nav { gap: 0.35rem; padding: 0.3rem 0.75rem 0; }
   .tab-btn { font-size: 0.75rem; padding: 0.4rem 1rem; }
   .empty-state {
-    padding: 1.7rem 1rem 1.85rem;
+    padding: 1.45rem 0.85rem 1.55rem;
+  }
+  .empty-state-title {
+    font-size: 0.84rem;
+  }
+  .empty-state p {
+    font-size: 0.72rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .db-glance {
+    margin-top: 1.05rem;
   }
   .db-glance-head {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.12rem;
     text-align: center;
+    margin-bottom: 0.55rem;
+    font-size: 0.6rem;
+    line-height: 1.45;
+    letter-spacing: 0.04em;
   }
   .db-glance-count {
     display: block;
-    margin-top: 0.35rem;
+    margin-top: 0;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
   }
   .sample-marquee {
-    margin: 0 -0.2rem;
-    padding: 0.05rem 0.2rem 0.35rem;
-    overflow-x: auto;
+    margin: 0;
+    padding: 0.05rem 0 0.15rem;
+    overflow-x: hidden;
     overflow-y: hidden;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-    -webkit-mask-image: none;
-    mask-image: none;
-    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   }
   .sample-marquee::-webkit-scrollbar {
     display: none;
   }
   .sample-marquee-track {
     width: max-content;
-    animation: none;
+    animation: sampleMarquee 58s linear infinite;
   }
   .sample-marquee-set {
-    gap: 0.5rem;
-    padding-right: 0;
+    gap: 0.45rem;
+    padding-right: 0.45rem;
   }
   .sample-marquee-set.is-duplicate {
-    display: none;
+    display: flex;
   }
   .sample-card {
-    min-width: 9.75rem;
-    max-width: 9.75rem;
-    scroll-snap-align: start;
+    flex: 0 0 7.85rem;
+    min-width: 7.85rem;
+    max-width: 7.85rem;
+    padding: 0.5rem 0.58rem;
+    border-radius: 7px;
+  }
+  .sample-card-top {
+    gap: 0.45rem;
+    font-size: 0.66rem;
+  }
+  .sample-card-meta {
+    gap: 0.32rem;
+    margin-top: 0.34rem;
+    min-height: 0.95rem;
+    font-size: 0.58rem;
+  }
+  .sample-video-pill {
+    padding: 0.04rem 0.3rem;
+    font-size: 0.54rem;
   }
 }
 
