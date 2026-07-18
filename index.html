@@ -857,6 +857,105 @@ body.app-ready .loading-stage {
   line-height: 1.8;
   color: var(--text-muted);
 }
+.db-glance {
+  margin: 1.45rem auto 0;
+  max-width: 760px;
+  text-align: left;
+}
+.db-glance-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+.db-glance-count {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sample-marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 0.08rem 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.sample-marquee-track {
+  display: flex;
+  gap: 0.625rem;
+  width: max-content;
+  animation: sampleMarquee 28s linear infinite;
+}
+.sample-marquee:hover .sample-marquee-track {
+  animation-play-state: paused;
+}
+.sample-card {
+  appearance: none;
+  box-sizing: border-box;
+  min-width: 10.4rem;
+  padding: 0.62rem 0.75rem;
+  border: 1px solid rgba(150,180,240,0.16);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.026);
+  color: var(--text-muted);
+  font-family: 'Noto Sans TC', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.sample-card:hover {
+  border-color: rgba(184,212,255,0.42);
+  background: rgba(184,212,255,0.07);
+  color: var(--text);
+}
+.sample-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.sample-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.1rem;
+  margin-top: 0.45rem;
+  color: var(--text-dim);
+  font-size: 0.66rem;
+}
+.sample-card-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sample-video-pill {
+  flex: 0 0 auto;
+  padding: 0.08rem 0.42rem;
+  border: 1px solid var(--col-open-border);
+  border-radius: 999px;
+  background: var(--col-open-bg);
+  color: var(--col-open);
+  font-size: 0.62rem;
+}
+@keyframes sampleMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sample-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+  }
+}
 .empty-state-sync {
   display: inline-flex;
   align-items: center;
@@ -1679,6 +1778,20 @@ select.card-input option {
   /* tab nav fits smaller screens */
   .tab-nav { gap: 0.35rem; padding: 0.3rem 0.75rem 0; }
   .tab-btn { font-size: 0.75rem; padding: 0.4rem 1rem; }
+  .empty-state {
+    padding: 1.7rem 1rem 1.85rem;
+  }
+  .db-glance-head {
+    display: block;
+    text-align: center;
+  }
+  .db-glance-count {
+    display: block;
+    margin-top: 0.35rem;
+  }
+  .sample-card {
+    min-width: 9.25rem;
+  }
 }
 
 </style>
@@ -1949,6 +2062,70 @@ function emptyStateMarkup(title, body, showSyncState = false) {
       ${showSyncState ? syncStateMarkup() : ''}
       <div class="empty-state-title">${escapeHtml(title)}</div>
       <p>${escapeHtml(body)}</p>
+    </div>
+  `;
+}
+
+function samplePanelNote(d) {
+  const candidates = [d.upperCard, d.lowerCard, d.upperPartner, d.lowerPartner]
+    .filter(value => value && value !== 'N/A');
+  return candidates[0] || '單層面板';
+}
+
+function getRandomPanelSamples(count = 8) {
+  const indexed = DATA.map((item, index) => ({ item, index }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  return indexed.slice(0, Math.min(count, indexed.length));
+}
+
+function panelSampleCardMarkup(sample) {
+  const d = sample.item;
+  const orbitLabel = ORBIT_LABEL[d.orbit] || d.orbit;
+  const note = samplePanelNote(d);
+  return `
+    <button type="button" class="sample-card" onclick="openPanelSample(${sample.index})" aria-label="查看${escapeHtml(orbitLabel)}${escapeHtml(d.layer)}層資料">
+      <div class="sample-card-top">
+        <span>${escapeHtml(orbitLabel)}</span>
+        <span>${escapeHtml(d.layer)} 層</span>
+      </div>
+      <div class="sample-card-meta">
+        <span class="sample-card-note">${escapeHtml(note)}</span>
+        ${d.hasVideo ? '<span class="sample-video-pill">附影片</span>' : ''}
+      </div>
+    </button>
+  `;
+}
+
+function panelGlanceMarkup() {
+  if (!panelDataLoaded || DATA.length === 0) return '';
+  const samples = getRandomPanelSamples(8);
+  if (samples.length === 0) return '';
+  const cards = samples.map(panelSampleCardMarkup).join('');
+  return `
+    <div class="db-glance">
+      <div class="db-glance-head">
+        <span>隨機看看資料庫裡的通關紀錄</span>
+        <span class="db-glance-count">目前收錄軌道資料 ${DATA.length.toLocaleString('zh-TW')} 筆</span>
+      </div>
+      <div class="sample-marquee">
+        <div class="sample-marquee-track">
+          ${cards}
+          ${cards}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function panelInitialStateMarkup() {
+  return `
+    <div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-state-title">請選擇軌道類型並輸入層數</div>
+      <p>系統會依照資料庫現有內容，顯示結果或進階篩選選項。</p>
+      ${panelGlanceMarkup()}
     </div>
   `;
 }
@@ -2709,7 +2886,7 @@ function renderCards() {
   if (!panelQueryStarted()) {
     document.getElementById('resultsInfo').innerHTML = '';
     renderDynamicFilters([], null);
-    grid.innerHTML = emptyStateMarkup('請選擇軌道類型並輸入層數', '系統會依照資料庫現有內容，顯示結果或進階篩選選項。');
+    grid.innerHTML = panelInitialStateMarkup();
     updateScrollButtons();
     return;
   }
@@ -2771,6 +2948,11 @@ function modalBlock(card, partner, dir) {
   return `<div class="modal-row"><span class="modal-label">日卡</span><span class="modal-val">${escapeHtml(card)}</span></div>
     <div class="modal-row"><span class="modal-label">搭檔</span><span class="modal-val">${escapeHtml(partner)}</span></div>
     <div class="modal-row"><span class="modal-label">對譜情形</span><span class="modal-val">${dirText}</span></div>`;
+}
+
+function openPanelSample(index) {
+  const d = DATA[index];
+  if (d) openPanelDetail(d);
 }
 
 function openPanelDetail(d, recordHistory = true) {
