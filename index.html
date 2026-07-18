@@ -641,6 +641,9 @@ body.app-ready .loading-stage {
   letter-spacing: 0.05em;
 }
 .results-info span { color: var(--accent); }
+#resultsInfo {
+  min-height: 1.25rem;
+}
 .loading-inline {
   display: inline-flex;
   align-items: center;
@@ -671,6 +674,14 @@ body.app-ready .loading-stage {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
   gap: 1rem;
+}
+#resultsInfo,
+#cardsGrid {
+  transition: opacity 0.24s ease;
+}
+#resultsInfo.is-fading,
+#cardsGrid.is-fading {
+  opacity: 0;
 }
 
 /* Card */
@@ -2017,6 +2028,8 @@ let activePartner = null;
 let activeEndlessCard = null;
 let layerOK = true;
 let currentData = [];
+let panelRenderStateKey = null;
+let panelRenderTimer = null;
 let activeLayerFilters = { upper: [], lower: [] };
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
@@ -2881,35 +2894,57 @@ function cardLayerBlock(card, partner, dir, label) {
   </div>`;
 }
 
-function renderCards() {
+function setPanelResultsContent(stateKey, infoHtml, gridHtml) {
+  const info = document.getElementById('resultsInfo');
   const grid = document.getElementById('cardsGrid');
+  if (!info || !grid) return;
+  const shouldAnimate = panelRenderStateKey !== null && panelRenderStateKey !== stateKey;
+  window.clearTimeout(panelRenderTimer);
+
+  const applyContent = () => {
+    panelRenderStateKey = stateKey;
+    info.innerHTML = infoHtml;
+    grid.innerHTML = gridHtml;
+    window.requestAnimationFrame(() => {
+      info.classList.remove('is-fading');
+      grid.classList.remove('is-fading');
+      updateScrollButtons();
+    });
+  };
+
+  if (shouldAnimate) {
+    info.classList.add('is-fading');
+    grid.classList.add('is-fading');
+    panelRenderTimer = window.setTimeout(applyContent, 180);
+    return;
+  }
+
+  info.classList.remove('is-fading');
+  grid.classList.remove('is-fading');
+  applyContent();
+}
+
+function renderCards() {
   if (!panelQueryStarted()) {
-    document.getElementById('resultsInfo').innerHTML = '';
     renderDynamicFilters([], null);
-    grid.innerHTML = panelInitialStateMarkup();
-    updateScrollButtons();
+    setPanelResultsContent('prompt', '', panelInitialStateMarkup());
     return;
   }
   if (panelDataLoadFailed) {
-    document.getElementById('resultsInfo').innerHTML = '⚠ 資料載入失敗，請重新整理頁面';
     renderDynamicFilters([], null);
-    grid.innerHTML = '';
-    updateScrollButtons();
+    setPanelResultsContent('failed', '⚠ 資料載入失敗，請重新整理頁面', '');
     return;
   }
   if (!panelDataLoaded) {
-    document.getElementById('resultsInfo').innerHTML = loadingMarkup();
-    grid.innerHTML = '';
-    updateScrollButtons();
+    setPanelResultsContent('loading', loadingMarkup(), '');
     return;
   }
-  document.getElementById('resultsInfo').innerHTML = `共找到 <span>${currentData.length}</span> 筆結果`;
+  const infoHtml = `共找到 <span>${currentData.length}</span> 筆結果`;
   if (currentData.length === 0) {
-    grid.innerHTML = emptyStateMarkup('找不到符合條件的結果', '期待您成為第一位分享者，或嘗試放寬目前的篩選條件。');
-    updateScrollButtons();
+    setPanelResultsContent('empty', infoHtml, emptyStateMarkup('找不到符合條件的結果', '期待您成為第一位分享者，或嘗試放寬目前的篩選條件。'));
     return;
   }
-  grid.innerHTML = currentData.map((d, i) => {
+  const gridHtml = currentData.map((d, i) => {
     const orbit = escapeHtml(d.orbit);
     const orbitLabel = escapeHtml(ORBIT_LABEL[d.orbit] || d.orbit);
     return `
@@ -2933,7 +2968,7 @@ function renderCards() {
       </div>
     </div>`;
   }).join('');
-  updateScrollButtons();
+  setPanelResultsContent('results', infoHtml, gridHtml);
 }
 
 function dirTag(dir) {
