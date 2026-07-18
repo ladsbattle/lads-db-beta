@@ -897,9 +897,14 @@ body.app-ready .loading-stage {
 }
 .sample-marquee-track {
   display: flex;
-  gap: 0.625rem;
   width: max-content;
   animation: sampleMarquee 56s linear infinite;
+}
+.sample-marquee-set {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.625rem;
+  padding-right: 0.625rem;
 }
 .sample-marquee:hover .sample-marquee-track {
   animation-play-state: paused;
@@ -963,8 +968,14 @@ body.app-ready .loading-stage {
 @media (prefers-reduced-motion: reduce) {
   .sample-marquee-track {
     animation: none;
+    width: auto;
+  }
+  .sample-marquee-set {
     flex-wrap: wrap;
     width: auto;
+  }
+  .sample-marquee-set.is-duplicate {
+    display: none;
   }
 }
 .empty-state-sync {
@@ -1800,8 +1811,35 @@ select.card-input option {
     display: block;
     margin-top: 0.35rem;
   }
+  .sample-marquee {
+    margin: 0 -0.2rem;
+    padding: 0.05rem 0.2rem 0.35rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: none;
+    mask-image: none;
+    scrollbar-width: none;
+  }
+  .sample-marquee::-webkit-scrollbar {
+    display: none;
+  }
+  .sample-marquee-track {
+    width: max-content;
+    animation: none;
+  }
+  .sample-marquee-set {
+    gap: 0.5rem;
+    padding-right: 0;
+  }
+  .sample-marquee-set.is-duplicate {
+    display: none;
+  }
   .sample-card {
-    min-width: 9.25rem;
+    min-width: 9.75rem;
+    max-width: 9.75rem;
+    scroll-snap-align: start;
   }
 }
 
@@ -2125,8 +2163,8 @@ function panelGlanceMarkup() {
       </div>
       <div class="sample-marquee">
         <div class="sample-marquee-track">
-          ${cards}
-          ${cards}
+          <div class="sample-marquee-set">${cards}</div>
+          <div class="sample-marquee-set is-duplicate" aria-hidden="true">${cards}</div>
         </div>
       </div>
     </div>
