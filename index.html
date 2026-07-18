@@ -262,6 +262,21 @@ body.app-ready .loading-stage {
   margin-bottom: 1.125rem;
 }
 
+.filter-hint {
+  margin: -0.35rem 0 1.05rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.7;
+  letter-spacing: 0.05em;
+  opacity: 0.88;
+  transition: opacity 0.24s ease, color 0.24s ease;
+  text-wrap: pretty;
+}
+.filter-hint.is-soft {
+  color: var(--text-dim);
+  opacity: 0.55;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;
@@ -644,6 +659,9 @@ body.app-ready .loading-stage {
 #resultsInfo {
   min-height: 1.25rem;
 }
+#resultsInfo:empty {
+  display: none;
+}
 .loading-inline {
   display: inline-flex;
   align-items: center;
@@ -869,6 +887,12 @@ body.app-ready .loading-stage {
   font-size: 0.82rem;
   line-height: 1.8;
   color: var(--text-muted);
+}
+.db-overview-state {
+  padding: 1.45rem 1rem 1.55rem;
+}
+.db-overview-state .db-glance {
+  margin-top: 0;
 }
 .db-glance {
   margin: 1.45rem auto 0;
@@ -1726,6 +1750,12 @@ select.card-input option {
   .filter-panel { padding: 1rem; }
   .filter-header { margin-bottom: 0.875rem; }
   .filter-title { font-size: 0.76rem; letter-spacing: 0.2em; }
+  .filter-hint {
+    margin: -0.2rem 0 0.85rem;
+    font-size: 0.64rem;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+  }
   .btn-reset-compact {
     gap: 0.25rem;
     padding: 0.25rem 0.65rem;
@@ -1808,6 +1838,9 @@ select.card-input option {
   .tab-btn { font-size: 0.75rem; padding: 0.4rem 1rem; }
   .empty-state {
     padding: 1.45rem 0.85rem 1.55rem;
+  }
+  .db-overview-state {
+    padding: 1.05rem 0.75rem 1.15rem;
   }
   .empty-state-title {
     font-size: 0.84rem;
@@ -1922,6 +1955,7 @@ select.card-input option {
         重設
       </button>
     </div>
+    <div class="filter-hint" id="panelFilterHint">選擇軌道類型並輸入層數後，系統會顯示結果與進階篩選。</div>
 
     <div class="orbit-group">
       <div class="orbit-label">軌道類型</div>
@@ -2212,11 +2246,10 @@ function panelGlanceMarkup() {
 }
 
 function panelInitialStateMarkup() {
+  const glance = panelGlanceMarkup();
   return `
-    <div class="empty-state" style="grid-column:1/-1">
-      <div class="empty-state-title">請選擇軌道類型並輸入層數</div>
-      <p>系統會依照資料庫現有內容，顯示結果或進階篩選選項。</p>
-      ${panelGlanceMarkup()}
+    <div class="empty-state db-overview-state" style="grid-column:1/-1">
+      ${glance || '<div class="empty-state-title">資料整理中</div>'}
     </div>
   `;
 }
@@ -2271,6 +2304,14 @@ function panelQueryStarted() {
   const layerVal = document.getElementById('layerInput')?.value.trim() || '';
   const layerNum = layerVal !== '' ? parseInt(layerVal, 10) : null;
   return Boolean(activeOrbit && layerNum !== null && layerOK);
+}
+
+function updatePanelFilterHint() {
+  const hint = document.getElementById('panelFilterHint');
+  if (!hint) return;
+  const layerVal = document.getElementById('layerInput')?.value.trim() || '';
+  const videoOnly = document.getElementById('videoOnly')?.checked || false;
+  hint.classList.toggle('is-soft', Boolean(activeOrbit || layerVal || videoOnly));
 }
 
 function formatTaipeiDateTime(value) {
@@ -2459,6 +2500,7 @@ function validateLayer() {
     inp.classList.remove('error-input');
     errEl.classList.remove('show');
   }
+  updatePanelFilterHint();
   if (layerOK) applyFilters();
 }
 
@@ -2927,6 +2969,7 @@ function matchesLayerFilters(d, side) {
 }
 
 function applyFilters() {
+  updatePanelFilterHint();
   const layerVal = document.getElementById('layerInput').value.trim();
   const layerNum = layerVal !== '' ? parseInt(layerVal) : null;
   const videoOnly = document.getElementById('videoOnly').checked;
