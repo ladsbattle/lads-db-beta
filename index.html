@@ -12,6 +12,10 @@
   --bg3: #111e35;
   --card: #0f1a2e;
   --card-hover: #162340;
+  --surface-panel: rgba(13,21,38,0.8);
+  --surface-control: rgba(17,30,53,0.8);
+  --surface-card: rgba(15,26,46,0.8);
+  --surface-card-hover: rgba(22,35,64,0.84);
   --border: rgba(150,180,240,0.2);
   --border-bright: rgba(180,210,255,0.45);
   --accent: #b8d4ff;
@@ -108,15 +112,15 @@ body::after {
 
 .site-watermark {
   position: fixed;
-  top: clamp(10rem, 25vh, 18rem);
-  right: clamp(-18rem, -8vw, -5rem);
+  top: 50vh;
+  left: 50vw;
   z-index: 1;
-  width: min(58vw, 43rem);
+  width: min(70vw, 44rem);
   color: #ffffff;
-  opacity: 0.045;
+  opacity: 0.145;
   pointer-events: none;
-  transform: rotate(-5deg);
-  filter: drop-shadow(0 0 48px rgba(184,212,255,0.18));
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 52px rgba(184,212,255,0.22));
 }
 
 .site-watermark svg {
@@ -215,7 +219,7 @@ header {
   padding: 0.52rem 1rem;
   border: 1px solid rgba(150,180,240,0.26);
   border-radius: 999px;
-  background: rgba(13,21,38,0.54);
+  background: var(--surface-panel);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   backdrop-filter: blur(10px);
 }
@@ -294,7 +298,7 @@ header {
 
 /* Filter panel */
 .filter-panel {
-  background: var(--bg2);
+  background: var(--surface-panel);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
@@ -414,7 +418,7 @@ header {
   padding: 0.56rem 0.4rem;
   border-radius: 10px;
   border: 1px solid rgba(150,180,240,0.22);
-  background: rgba(255,255,255,0.03);
+  background: rgba(21,31,51,0.9);
   color: var(--text-muted);
   font-size: 0.78rem;
   font-family: 'Noto Sans TC', sans-serif;
@@ -441,7 +445,7 @@ header {
   width: 100%;
   height: 2.375rem;
   box-sizing: border-box;
-  background: var(--bg3);
+  background: var(--surface-control);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.52rem 0.75rem;
@@ -474,7 +478,7 @@ header {
 .card-input {
   height: 2.375rem;
   box-sizing: border-box;
-  background: var(--bg3);
+  background: var(--surface-control);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.52rem 0.75rem;
@@ -532,7 +536,7 @@ header {
   padding: 0.52rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--bg3);
+  background: var(--surface-control);
   color: var(--text);
   font-size: 0.75rem;
   font-family: 'Noto Sans TC', sans-serif;
@@ -576,7 +580,7 @@ header {
 }
 .video-toggle:has(input:checked) {
   border-color: var(--border);
-  background: var(--bg3);
+  background: var(--surface-control);
   color: var(--text);
 }
 
@@ -608,7 +612,7 @@ header {
   padding: 0.95rem 1rem;
   border-radius: 8px;
   border: 1px solid rgba(184,212,255,0.08);
-  background: rgba(255,255,255,0.018);
+  background: rgba(17,30,53,0.72);
 }
 .dynamic-filter-panel.is-placeholder .dynamic-filter-placeholder {
   display: block;
@@ -771,7 +775,7 @@ header {
 
 /* Card */
 .panel-card {
-  background: var(--card);
+  background: var(--surface-card);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem 1.1rem;
@@ -788,7 +792,7 @@ header {
   opacity: 0;
   transition: opacity 0.25s;
 }
-.panel-card:hover { background: var(--card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.panel-card:hover { background: var(--surface-card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 .panel-card:hover::before { opacity: 1; }
 
 .card-labels,
@@ -855,7 +859,7 @@ header {
 }
 
 .layer-block {
-  background: rgba(255,255,255,0.03);
+  background: rgba(21,31,51,0.72);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 7px;
   padding: 0.55rem 0.75rem;
@@ -939,7 +943,7 @@ header {
   text-align: center;
   padding: 2.25rem 1rem 2.35rem;
   color: var(--text-dim);
-  background: rgba(13,21,38,0.42);
+  background: var(--surface-panel);
   border: 1px solid rgba(150,180,240,0.16);
   border-radius: 12px;
 }
@@ -1017,7 +1021,7 @@ header {
   padding: 0.62rem 0.75rem;
   border: 1px solid rgba(150,180,240,0.16);
   border-radius: 8px;
-  background: rgba(255,255,255,0.026);
+  background: rgba(21,31,51,0.82);
   color: var(--text-muted);
   font-family: 'Noto Sans TC', sans-serif;
   text-align: left;
@@ -1182,7 +1186,7 @@ header {
 .modal-overlay.show { display: flex; }
 
 .modal {
-  background: var(--bg2);
+  background: var(--surface-panel);
   border: 1px solid var(--border-bright);
   border-radius: 14px;
   max-width: 480px;
@@ -1486,7 +1490,7 @@ body.app-ready .query-shell {
 
 /* ── Endless challenge cards ── */
 .endless-filter-panel {
-  background: var(--bg2);
+  background: var(--surface-panel);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
@@ -1498,7 +1502,7 @@ body.app-ready .query-shell {
   gap: 1rem;
 }
 .endless-card {
-  background: var(--card);
+  background: var(--surface-card);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem 1.1rem;
@@ -1515,7 +1519,7 @@ body.app-ready .query-shell {
   opacity: 0;
   transition: opacity 0.25s;
 }
-.endless-card:hover { background: var(--card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.endless-card:hover { background: var(--surface-card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 .endless-card:hover::before { opacity: 1; }
 
 /* partner colour top bar */
@@ -1819,11 +1823,12 @@ select.card-input option {
 
 @media (max-width: 600px) {
   .site-watermark {
-    top: 15.5rem;
-    right: -36vw;
-    width: 96vw;
-    opacity: 0.032;
-    transform: rotate(-6deg);
+    top: 50vh;
+    left: 50vw;
+    right: auto;
+    width: 94vw;
+    opacity: 0.13;
+    transform: translate(-50%, -50%);
   }
   header {
     width: calc(100vw - 2rem);
