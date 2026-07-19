@@ -12,10 +12,10 @@
   --bg3: #111e35;
   --card: #0f1a2e;
   --card-hover: #162340;
-  --surface-panel: rgba(13,21,38,0.8);
-  --surface-control: rgba(17,30,53,0.8);
-  --surface-card: rgba(15,26,46,0.8);
-  --surface-card-hover: rgba(22,35,64,0.84);
+  --surface-panel: rgba(13,21,38,0.72);
+  --surface-control: rgba(17,30,53,0.72);
+  --surface-card: rgba(15,26,46,0.72);
+  --surface-card-hover: rgba(22,35,64,0.78);
   --border: rgba(150,180,240,0.2);
   --border-bright: rgba(180,210,255,0.45);
   --accent: #b8d4ff;
@@ -115,7 +115,7 @@ body::after {
   top: 50vh;
   left: 50vw;
   z-index: 1;
-  width: min(70vw, 44rem);
+  width: min(60vh, 38rem, 72vw);
   color: #ffffff;
   opacity: 0.145;
   pointer-events: none;
@@ -418,7 +418,7 @@ header {
   padding: 0.56rem 0.4rem;
   border-radius: 10px;
   border: 1px solid rgba(150,180,240,0.22);
-  background: rgba(21,31,51,0.9);
+  background: rgba(21,31,51,0.72);
   color: var(--text-muted);
   font-size: 0.78rem;
   font-family: 'Noto Sans TC', sans-serif;
@@ -612,7 +612,7 @@ header {
   padding: 0.95rem 1rem;
   border-radius: 8px;
   border: 1px solid rgba(184,212,255,0.08);
-  background: rgba(17,30,53,0.72);
+  background: rgba(17,30,53,0.62);
 }
 .dynamic-filter-panel.is-placeholder .dynamic-filter-placeholder {
   display: block;
@@ -859,7 +859,7 @@ header {
 }
 
 .layer-block {
-  background: rgba(21,31,51,0.72);
+  background: rgba(21,31,51,0.62);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 7px;
   padding: 0.55rem 0.75rem;
@@ -1021,7 +1021,7 @@ header {
   padding: 0.62rem 0.75rem;
   border: 1px solid rgba(150,180,240,0.16);
   border-radius: 8px;
-  background: rgba(21,31,51,0.82);
+  background: rgba(21,31,51,0.68);
   color: var(--text-muted);
   font-family: 'Noto Sans TC', sans-serif;
   text-align: left;
