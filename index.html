@@ -33,6 +33,8 @@
 }
 
 .site-footer {
+  position: relative;
+  z-index: 10;
   text-align: center;
   font-size: 13px;
   color: #888;
@@ -104,21 +106,42 @@ body::after {
   z-index: 0;
 }
 
+.site-watermark {
+  position: fixed;
+  top: clamp(10rem, 25vh, 18rem);
+  right: clamp(-18rem, -8vw, -5rem);
+  z-index: 1;
+  width: min(58vw, 43rem);
+  color: #ffffff;
+  opacity: 0.045;
+  pointer-events: none;
+  transform: rotate(-5deg);
+  filter: drop-shadow(0 0 48px rgba(184,212,255,0.18));
+}
+
+.site-watermark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Header */
 header {
   position: relative;
   z-index: 10;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(15.5rem, 22rem);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: clamp(1rem, 4vw, 2.4rem);
   width: min(1100px, calc(100vw - 2.5rem));
   margin: 0 auto;
-  text-align: left;
-  padding: 3rem 0 0.65rem;
+  text-align: center;
+  padding: 3.1rem 0 0.5rem;
 }
 
 .site-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-width: 0;
 }
 
@@ -145,14 +168,15 @@ header {
 }
 
 .title-divider {
-  width: min(9.5rem, 34vw);
+  width: min(90vw, 68.75rem);
   height: 1px;
   margin-top: 0.75rem;
   background: linear-gradient(90deg, transparent, rgba(184,212,255,0.34), transparent);
 }
 .site-heading .title-divider {
-  margin-left: 0;
-  background: linear-gradient(90deg, rgba(184,212,255,0.62), rgba(200,180,255,0.26), transparent);
+  margin-left: auto;
+  margin-right: auto;
+  background: linear-gradient(90deg, transparent, rgba(184,212,255,0.62), rgba(200,180,255,0.26), transparent);
 }
 .info-button {
   position: static;
@@ -182,80 +206,68 @@ header {
 }
 
 .header-data-card {
-  justify-self: stretch;
-  min-height: 8.1rem;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  width: min(34rem, 100%);
+  min-height: 0;
+  display: flex;
   align-items: center;
-  gap: 0.95rem;
-  padding: 1rem 1.05rem;
-  border: 1px solid rgba(150,180,240,0.2);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 92% 0%, rgba(255,209,102,0.11), transparent 58%),
-    rgba(13,21,38,0.72);
-  box-shadow: 0 18px 48px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
-  backdrop-filter: blur(16px);
-}
-
-.header-data-icon {
-  width: 3.2rem;
-  height: 3.2rem;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  border: 1px solid rgba(184,212,255,0.22);
-  background: rgba(184,212,255,0.08);
-  color: var(--accent);
-  box-shadow: 0 0 28px rgba(184,212,255,0.1);
-}
-
-.header-data-icon svg {
-  width: 1.55rem;
-  height: 1.55rem;
+  justify-content: center;
+  margin-top: 1.05rem;
+  padding: 0.52rem 1rem;
+  border: 1px solid rgba(150,180,240,0.26);
+  border-radius: 999px;
+  background: rgba(13,21,38,0.54);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px);
 }
 
 .header-data-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
   min-width: 0;
 }
 
 .header-data-kicker {
-  color: var(--text-dim);
-  font-size: 0.66rem;
-  letter-spacing: 0.18em;
-  margin-bottom: 0.35rem;
+  display: none;
 }
 
 .header-data-status {
-  color: var(--text);
-  font-size: clamp(1rem, 2vw, 1.18rem);
+  color: var(--text-muted);
+  font-size: 0.78rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.38rem;
+  letter-spacing: 0.06em;
+  margin: 0;
 }
 
 .header-data-meta {
   color: var(--text-muted);
-  font-size: 0.76rem;
-  line-height: 1.55;
+  font-size: 0.78rem;
+  line-height: 1.4;
   letter-spacing: 0.04em;
 }
 
-.header-data-card.is-done {
-  border-color: rgba(117,210,157,0.22);
+.header-data-meta strong {
+  color: var(--text);
+  font-weight: 500;
 }
 
-.header-data-card.is-done .header-data-icon {
-  color: #cfe8d8;
+.header-data-status::after {
+  content: '·';
+  color: var(--text-dim);
+  font-weight: 300;
+  margin-left: 0.85rem;
+}
+
+.header-data-card.is-done {
   border-color: rgba(117,210,157,0.24);
-  background: rgba(117,210,157,0.08);
 }
 
 .header-data-card.is-failed {
   border-color: rgba(248,202,202,0.32);
 }
 
-.header-data-card.is-failed .header-data-icon,
 .header-data-card.is-failed .header-data-status {
   color: #f8caca;
 }
@@ -304,12 +316,22 @@ header {
   margin-bottom: 1.125rem;
 }
 
+.filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
 .filter-hint {
   margin: -0.35rem 0 1.05rem;
   color: var(--text-muted);
   font-size: 0.72rem;
   line-height: 1.7;
   letter-spacing: 0.05em;
+  min-height: 1.7em;
   opacity: 0.88;
   transition: opacity 0.24s ease, color 0.24s ease;
   text-wrap: pretty;
@@ -317,6 +339,9 @@ header {
 .filter-hint.is-soft {
   color: var(--text-dim);
   opacity: 0.55;
+}
+.filter-hint-spacer {
+  color: transparent;
 }
 
 .filter-group {
@@ -1415,24 +1440,30 @@ header {
   position: relative;
   z-index: 10;
   display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.35rem 1rem 0;
-  max-width: 1100px;
-  margin: 0 auto;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding: 0;
+  max-width: none;
+  margin: 0;
 }
 .tab-btn {
-  padding: 0.45rem 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.45rem;
+  padding: 0.5rem 1.45rem;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
   font-family: 'Noto Sans TC', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
   letter-spacing: 0.05em;
 }
+.tab-btn[data-tab="panel"] { width: 5.2rem; }
+.tab-btn[data-tab="endless"] { width: 7.6rem; }
 .tab-btn:hover { border-color: var(--border-bright); color: var(--text); }
 .tab-btn.active {
   background: rgba(255,255,255,0.08);
@@ -1787,39 +1818,38 @@ select.card-input option {
 }
 
 @media (max-width: 600px) {
+  .site-watermark {
+    top: 15.5rem;
+    right: -36vw;
+    width: 96vw;
+    opacity: 0.032;
+    transform: rotate(-6deg);
+  }
   header {
-    grid-template-columns: 1fr;
-    gap: 0.9rem;
     width: calc(100vw - 2rem);
-    padding: 2.25rem 0 0.55rem;
+    padding: 2.25rem 0 0.45rem;
   }
   .site-title-row {
     margin-top: 0.7rem;
   }
   .header-data-card {
+    width: min(100%, 24rem);
+    margin-top: 0.85rem;
     min-height: 0;
-    padding: 0.85rem;
-    border-radius: 15px;
-  }
-  .header-data-icon {
-    width: 2.55rem;
-    height: 2.55rem;
-    border-radius: 13px;
-  }
-  .header-data-icon svg {
-    width: 1.28rem;
-    height: 1.28rem;
-  }
-  .header-data-kicker {
-    font-size: 0.62rem;
-    margin-bottom: 0.25rem;
+    padding: 0.45rem 0.72rem;
+    border-radius: 999px;
   }
   .header-data-status {
-    font-size: 0.98rem;
-    margin-bottom: 0.28rem;
+    font-size: 0.72rem;
   }
   .header-data-meta {
     font-size: 0.72rem;
+  }
+  .header-data-status::after {
+    margin-left: 0.55rem;
+  }
+  .header-data-copy {
+    gap: 0.32rem 0.55rem;
   }
   .title-divider {
     margin-top: 0.55rem;
@@ -1834,16 +1864,34 @@ select.card-input option {
   .back-to-top { right: 1rem; bottom: 3.45rem; width: 2rem; height: 2rem; padding: 0; }
   .back-to-bottom { right: 1rem; bottom: 1rem; width: 2rem; height: 2rem; padding: 0; }
 
-  .filter-panel { padding: 1rem; }
-  .filter-header { margin-bottom: 0.875rem; }
+  .filter-panel,
+  .endless-filter-panel {
+    padding: 1rem;
+  }
+  .filter-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 0.875rem;
+  }
+  .filter-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    margin-left: 0;
+    gap: 0.45rem;
+  }
   .filter-title { font-size: 0.86rem; letter-spacing: 0.18em; }
   .filter-hint {
     margin: -0.15rem 0 0.9rem;
     font-size: 0.74rem;
     line-height: 1.6;
     letter-spacing: 0.03em;
+    min-height: 3.2em;
   }
   .btn-reset-compact {
+    flex: 0 0 auto;
+    min-width: 4.2rem;
     gap: 0.25rem;
     padding: 0.25rem 0.65rem;
     font-size: 0.76rem;
@@ -1921,8 +1969,19 @@ select.card-input option {
   .endless-grid { grid-template-columns: 1fr; }
 
   /* tab nav fits smaller screens */
-  .tab-nav { gap: 0.35rem; padding: 0.3rem 0.75rem 0; }
-  .tab-btn { font-size: 0.88rem; padding: 0.45rem 1.05rem; }
+  .tab-nav {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    gap: 0.38rem;
+    padding: 0;
+  }
+  .tab-btn {
+    min-height: 2.42rem;
+    font-size: 0.9rem;
+    padding: 0.48rem 0.7rem;
+  }
+  .tab-btn[data-tab="panel"] { width: 4.7rem; }
+  .tab-btn[data-tab="endless"] { width: 6.85rem; }
   .empty-state {
     padding: 1.45rem 0.85rem 1.55rem;
   }
@@ -2010,6 +2069,12 @@ select.card-input option {
 </head>
 <body>
 
+<div class="site-watermark" aria-hidden="true">
+  <svg viewBox="0 0 620 620" focusable="false">
+    <path fill="currentColor" fill-rule="evenodd" d="M 306 13 L 317 13 L 318 73 L 307 73 Z M 228 105 L 404 105 L 405 111 L 375 159 L 332 161 L 260 277 L 227 232 L 227 227 L 270 160 L 102 161 L 103 166 L 153 167 L 238 304 L 236 318 L 212 359 L 207 361 L 54 120 L 50 108 Z M 427 105 L 562 105 L 569 107 L 570 113 L 549 147 L 536 145 L 539 134 L 471 134 L 455 158 L 398 159 L 395 157 L 396 151 Z M 481 151 L 538 153 L 541 158 L 316 523 L 311 530 L 306 530 L 277 482 Z M 352 188 L 410 188 L 414 192 L 358 287 L 375 288 L 379 291 L 378 296 L 344 349 L 322 350 L 259 448 L 228 397 Z M 312 546 L 315 607 L 304 607 L 303 547 Z"/>
+  </svg>
+</div>
+
 <header>
   <div class="site-heading">
     <a class="site-sub header-link" href="https://line.me/ti/g2/gw9Ds6tjgN1mPRRCKbc7pLofd4Wzd1MJoR71eQ" target="_blank" rel="noopener">戀與深空戰鬥討論群</a>
@@ -2021,15 +2086,7 @@ select.card-input option {
   </div>
 
   <aside class="header-data-card" id="headerDataCard" aria-live="polite">
-    <div class="header-data-icon" aria-hidden="true">
-      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="32" cy="32" r="20"/>
-        <path d="M32 8v8M32 48v8M8 32h8M48 32h8"/>
-        <path d="m25 39 5-14 9 8-14 6Z"/>
-      </svg>
-    </div>
     <div class="header-data-copy">
-      <div class="header-data-kicker">資料庫狀態</div>
       <div class="header-data-status" id="headerDataStatus">資料同步中</div>
       <div class="header-data-meta" id="headerDataMeta">正在整理軌道與無盡挑戰資料</div>
     </div>
@@ -2037,11 +2094,6 @@ select.card-input option {
 </header>
 
 <div class="query-shell" id="queryShell">
-<!-- Tab navigation -->
-<div class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('panel', this)">軌道</button>
-  <button class="tab-btn" onclick="switchTab('endless', this)">無盡挑戰</button>
-</div>
 
 <!-- Panel section -->
 <div class="section active" id="section-panel">
@@ -2049,11 +2101,17 @@ select.card-input option {
   <!-- Filter Panel -->
   <div class="filter-panel">
     <div class="filter-header">
-      <div class="filter-title">✦ 篩選條件</div>
-      <button class="btn-reset btn-reset-compact" onclick="resetFilters()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"/></svg>
-        重設
-      </button>
+      <div class="filter-title">✦ 篩選</div>
+      <div class="filter-actions">
+        <div class="tab-nav" aria-label="資料類型切換">
+          <button class="tab-btn active" data-tab="panel" onclick="switchTab('panel', this)">軌道</button>
+          <button class="tab-btn" data-tab="endless" onclick="switchTab('endless', this)">無盡挑戰</button>
+        </div>
+        <button class="btn-reset btn-reset-compact" onclick="resetFilters()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"/></svg>
+          重設
+        </button>
+      </div>
     </div>
     <div class="filter-hint" id="panelFilterHint">選擇軌道類型並輸入層數後，系統會顯示結果與進階篩選。</div>
 
@@ -2124,12 +2182,19 @@ select.card-input option {
   <!-- Endless filter panel -->
   <div class="endless-filter-panel">
     <div class="filter-header">
-      <div class="filter-title">✦ 篩選條件</div>
-      <button class="btn-reset btn-reset-compact" onclick="resetEndlessFilters()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"/></svg>
-        重設
-      </button>
+      <div class="filter-title">✦ 篩選</div>
+      <div class="filter-actions">
+        <div class="tab-nav" aria-label="資料類型切換">
+          <button class="tab-btn" data-tab="panel" onclick="switchTab('panel', this)">軌道</button>
+          <button class="tab-btn active" data-tab="endless" onclick="switchTab('endless', this)">無盡挑戰</button>
+        </div>
+        <button class="btn-reset btn-reset-compact" onclick="resetEndlessFilters()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"/></svg>
+          重設
+        </button>
+      </div>
     </div>
+    <div class="filter-hint filter-hint-spacer" id="endlessFilterHint" aria-hidden="true"></div>
     <div class="filter-fields endless-filter-fields">
       <div class="filter-group partner-group">
         <label>搭檔選擇</label>
@@ -2263,23 +2328,25 @@ function updateHeaderDataStatus() {
   const meta = document.getElementById('headerDataMeta');
   if (!card || !status || !meta) return;
 
+  const panelLabel = '<strong>軌道</strong>';
+  const endlessLabel = '<strong>無盡挑戰</strong>';
   const panelPart = panelDataLoaded
-    ? `軌道 ${DATA.length.toLocaleString('zh-TW')} 筆`
+    ? `${panelLabel} ${DATA.length.toLocaleString('zh-TW')} 筆`
     : panelDataLoadFailed
-      ? '軌道載入失敗'
-      : '軌道同步中';
+      ? `${panelLabel} 載入失敗`
+      : `${panelLabel} 同步中`;
   const endlessPart = endlessDataLoaded
-    ? `無盡 ${ENDLESS_ALL.length.toLocaleString('zh-TW')} 筆`
+    ? `${endlessLabel} ${ENDLESS_ALL.length.toLocaleString('zh-TW')} 筆`
     : endlessDataLoadFailed
-      ? '無盡載入失敗'
-      : '無盡同步中';
+      ? `${endlessLabel} 載入失敗`
+      : `${endlessLabel} 同步中`;
   const failed = panelDataLoadFailed || endlessDataLoadFailed;
   const done = panelDataLoaded && endlessDataLoaded && !failed;
 
   card.classList.toggle('is-done', done);
   card.classList.toggle('is-failed', failed);
   status.textContent = failed ? '部分資料載入失敗' : done ? '資料同步完成' : '資料同步中';
-  meta.textContent = `${panelPart}｜${endlessPart}`;
+  meta.innerHTML = `${panelPart}｜${endlessPart}`;
 }
 
 function revealQueryShell(delay = 0) {
@@ -2361,7 +2428,7 @@ function panelGlanceMarkup() {
   return `
     <div class="db-glance">
       <div class="db-glance-head db-glance-head-count">
-        <span class="db-glance-count">隨機看看資料庫裡的通關紀錄</span>
+        <span class="db-glance-count">隨機看看通關資料吧！</span>
       </div>
       <div class="sample-marquee">
         <div class="sample-marquee-track">
@@ -3290,10 +3357,19 @@ function openModal(idx) {
 }
 
 function switchTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const currentHeader = document.querySelector('.section.active .filter-header');
+  const anchorTop = currentHeader ? currentHeader.getBoundingClientRect().top : null;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const tabName = b.dataset.tab;
+    b.classList.toggle('active', tabName === tab);
+  });
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  btn.classList.add('active');
   document.getElementById('section-' + tab).classList.add('active');
+  const nextHeader = document.querySelector(`#section-${tab} .filter-header`);
+  if (anchorTop !== null && nextHeader && anchorTop > -40 && anchorTop < window.innerHeight * 0.8) {
+    const nextTop = nextHeader.getBoundingClientRect().top;
+    window.scrollBy(0, nextTop - anchorTop);
+  }
   updateScrollButtons();
 }
 
