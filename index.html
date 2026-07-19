@@ -196,13 +196,9 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 1.05rem;
-  padding: 0.52rem 1rem;
-  border: 1px solid rgba(150,180,240,0.26);
-  border-radius: 999px;
-  background: var(--surface-panel);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-  backdrop-filter: blur(10px);
+  margin-top: 0.95rem;
+  padding: 0;
+  background: transparent;
 }
 
 .header-data-copy {
@@ -224,6 +220,10 @@ header {
   font-weight: 500;
   letter-spacing: 0.06em;
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  white-space: nowrap;
 }
 
 .header-data-meta {
@@ -245,12 +245,38 @@ header {
   margin-left: 0.85rem;
 }
 
-.header-data-card.is-done {
-  border-color: rgba(117,210,157,0.24);
+.header-status-icon {
+  width: 0.88rem;
+  height: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
 }
 
-.header-data-card.is-failed {
-  border-color: rgba(248,202,202,0.32);
+.header-status-icon.is-syncing {
+  border: 1.5px solid rgba(184,212,255,0.24);
+  border-top-color: rgba(184,212,255,0.95);
+  border-radius: 50%;
+  animation: loadingSpin 0.85s linear infinite;
+}
+
+.header-status-icon.is-done {
+  border: 1.5px solid rgba(184,226,205,0.85);
+  border-radius: 50%;
+  color: #b8e2cd;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.header-status-icon.is-failed {
+  border: 1.5px solid rgba(248,202,202,0.85);
+  border-radius: 50%;
+  color: #f8caca;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .header-data-card.is-failed .header-data-status {
@@ -1819,10 +1845,9 @@ select.card-input option {
   }
   .header-data-card {
     width: min(100%, 24rem);
-    margin-top: 0.85rem;
+    margin-top: 0.8rem;
     min-height: 0;
-    padding: 0.45rem 0.72rem;
-    border-radius: 999px;
+    padding: 0;
   }
   .header-data-status {
     font-size: 0.72rem;
@@ -2070,7 +2095,10 @@ select.card-input option {
 
   <aside class="header-data-card" id="headerDataCard" aria-live="polite">
     <div class="header-data-copy">
-      <div class="header-data-status" id="headerDataStatus">資料同步中</div>
+      <div class="header-data-status" id="headerDataStatus">
+        <span class="header-status-icon is-syncing" aria-hidden="true"></span>
+        <span>資料同步中</span>
+      </div>
       <div class="header-data-meta" id="headerDataMeta">正在整理軌道與無盡挑戰資料</div>
     </div>
   </aside>
@@ -2324,7 +2352,13 @@ function updateHeaderDataStatus() {
 
   card.classList.toggle('is-done', done);
   card.classList.toggle('is-failed', failed);
-  status.textContent = failed ? '部分資料載入失敗' : done ? '資料同步完成' : '資料同步中';
+  const statusIcon = failed
+    ? '<span class="header-status-icon is-failed" aria-hidden="true">!</span>'
+    : done
+      ? '<span class="header-status-icon is-done" aria-hidden="true">✓</span>'
+      : '<span class="header-status-icon is-syncing" aria-hidden="true"></span>';
+  const statusText = failed ? '部分資料載入失敗' : done ? '資料同步完成' : '資料同步中';
+  status.innerHTML = `${statusIcon}<span>${statusText}</span>`;
   meta.innerHTML = `${panelPart}｜${endlessPart}`;
 }
 
