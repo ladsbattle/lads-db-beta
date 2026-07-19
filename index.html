@@ -108,11 +108,18 @@ body::after {
 header {
   position: relative;
   z-index: 10;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15.5rem, 22rem);
   align-items: center;
-  text-align: center;
-  padding: 3rem 1.5rem 0.65rem;
+  gap: clamp(1rem, 4vw, 2.4rem);
+  width: min(1100px, calc(100vw - 2.5rem));
+  margin: 0 auto;
+  text-align: left;
+  padding: 3rem 0 0.65rem;
+}
+
+.site-heading {
+  min-width: 0;
 }
 
 .site-title {
@@ -127,7 +134,9 @@ header {
 
 .site-title-row {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin-top: 0.8rem;
 }
 
@@ -141,58 +150,12 @@ header {
   margin-top: 0.75rem;
   background: linear-gradient(90deg, transparent, rgba(184,212,255,0.34), transparent);
 }
-.loading-stage {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  min-height: clamp(220px, 36vh, 390px);
-  padding: 1.5rem;
-  overflow: hidden;
-  opacity: 1;
-  transition: opacity 0.72s ease, visibility 0.72s ease;
+.site-heading .title-divider {
+  margin-left: 0;
+  background: linear-gradient(90deg, rgba(184,212,255,0.62), rgba(200,180,255,0.26), transparent);
 }
-.loading-stage-inner {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.85rem;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-}
-.loading-stage-spinner {
-  width: 2.45rem;
-  height: 2.45rem;
-  border-radius: 50%;
-  border: 1px solid rgba(184,212,255,0.18);
-  border-top-color: rgba(220,235,255,0.82);
-  border-right-color: rgba(184,212,255,0.42);
-  box-shadow: 0 0 26px rgba(184,212,255,0.16);
-  animation: loadingSpin 0.95s linear infinite;
-}
-.loading-stage-text {
-  font-size: 0.78rem;
-  animation: loadingBreath 1.7s ease-in-out infinite;
-}
-.loading-stage.is-failed .loading-stage-spinner {
-  display: none;
-}
-.loading-stage.is-failed .loading-stage-text {
-  color: #f8caca;
-  animation: none;
-}
-body.app-ready .loading-stage {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
 .info-button {
-  position: absolute;
-  left: calc(100% + 0.38rem);
-  top: 0.42rem;
+  position: static;
   width: 1.35rem;
   height: 1.35rem;
   display: inline-flex;
@@ -216,6 +179,85 @@ body.app-ready .loading-stage {
   border-color: rgba(210,230,255,0.68);
   background: rgba(184,212,255,0.16);
   transform: translateY(-1px);
+}
+
+.header-data-card {
+  justify-self: stretch;
+  min-height: 8.1rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.95rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(150,180,240,0.2);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(255,209,102,0.11), transparent 58%),
+    rgba(13,21,38,0.72);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(16px);
+}
+
+.header-data-icon {
+  width: 3.2rem;
+  height: 3.2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  border: 1px solid rgba(184,212,255,0.22);
+  background: rgba(184,212,255,0.08);
+  color: var(--accent);
+  box-shadow: 0 0 28px rgba(184,212,255,0.1);
+}
+
+.header-data-icon svg {
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.header-data-copy {
+  min-width: 0;
+}
+
+.header-data-kicker {
+  color: var(--text-dim);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.35rem;
+}
+
+.header-data-status {
+  color: var(--text);
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.38rem;
+}
+
+.header-data-meta {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+}
+
+.header-data-card.is-done {
+  border-color: rgba(117,210,157,0.22);
+}
+
+.header-data-card.is-done .header-data-icon {
+  color: #cfe8d8;
+  border-color: rgba(117,210,157,0.24);
+  background: rgba(117,210,157,0.08);
+}
+
+.header-data-card.is-failed {
+  border-color: rgba(248,202,202,0.32);
+}
+
+.header-data-card.is-failed .header-data-icon,
+.header-data-card.is-failed .header-data-status {
+  color: #f8caca;
 }
 
 .site-sub {
@@ -1399,9 +1441,8 @@ body.app-ready .loading-stage {
   font-weight: 500;
 }
 .query-shell {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.72s ease;
+  opacity: 1;
+  pointer-events: auto;
 }
 body.app-ready .query-shell {
   opacity: 1;
@@ -1747,14 +1788,41 @@ select.card-input option {
 
 @media (max-width: 600px) {
   header {
-    padding-bottom: 0.55rem;
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    width: calc(100vw - 2rem);
+    padding: 2.25rem 0 0.55rem;
+  }
+  .site-title-row {
+    margin-top: 0.7rem;
+  }
+  .header-data-card {
+    min-height: 0;
+    padding: 0.85rem;
+    border-radius: 15px;
+  }
+  .header-data-icon {
+    width: 2.55rem;
+    height: 2.55rem;
+    border-radius: 13px;
+  }
+  .header-data-icon svg {
+    width: 1.28rem;
+    height: 1.28rem;
+  }
+  .header-data-kicker {
+    font-size: 0.62rem;
+    margin-bottom: 0.25rem;
+  }
+  .header-data-status {
+    font-size: 0.98rem;
+    margin-bottom: 0.28rem;
+  }
+  .header-data-meta {
+    font-size: 0.72rem;
   }
   .title-divider {
     margin-top: 0.55rem;
-  }
-  .loading-stage {
-    min-height: clamp(160px, 28vh, 260px);
-    padding: 1rem;
   }
   .local-folder-panel {
     right: 1rem;
@@ -1943,20 +2011,30 @@ select.card-input option {
 <body>
 
 <header>
-  <a class="site-sub header-link" href="https://line.me/ti/g2/gw9Ds6tjgN1mPRRCKbc7pLofd4Wzd1MJoR71eQ" target="_blank" rel="noopener">戀與深空戰鬥討論群</a>
-  <div class="site-title-row">
-    <div class="site-title">面板資料庫</div>
-    <button class="info-button" onclick="openInfoModal()" aria-label="查看資料庫資訊" title="查看資料庫資訊">i</button>
+  <div class="site-heading">
+    <a class="site-sub header-link" href="https://line.me/ti/g2/gw9Ds6tjgN1mPRRCKbc7pLofd4Wzd1MJoR71eQ" target="_blank" rel="noopener">戀與深空戰鬥討論群</a>
+    <div class="site-title-row">
+      <div class="site-title">面板資料庫</div>
+      <button class="info-button" onclick="openInfoModal()" aria-label="查看資料庫資訊" title="查看資料庫資訊">i</button>
+    </div>
+    <div class="title-divider" aria-hidden="true"></div>
   </div>
-  <div class="title-divider" aria-hidden="true"></div>
-</header>
 
-<div class="loading-stage" id="loadingStage">
-  <div class="loading-stage-inner">
-    <div class="loading-stage-spinner" aria-hidden="true"></div>
-    <div class="loading-stage-text" id="loadingStageText">資料載入中…</div>
-  </div>
-</div>
+  <aside class="header-data-card" id="headerDataCard" aria-live="polite">
+    <div class="header-data-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="32" cy="32" r="20"/>
+        <path d="M32 8v8M32 48v8M8 32h8M48 32h8"/>
+        <path d="m25 39 5-14 9 8-14 6Z"/>
+      </svg>
+    </div>
+    <div class="header-data-copy">
+      <div class="header-data-kicker">資料庫狀態</div>
+      <div class="header-data-status" id="headerDataStatus">資料同步中</div>
+      <div class="header-data-meta" id="headerDataMeta">正在整理軌道與無盡挑戰資料</div>
+    </div>
+  </aside>
+</header>
 
 <div class="query-shell" id="queryShell">
 <!-- Tab navigation -->
@@ -2157,6 +2235,8 @@ let ENDLESS_DATA = [];
 let ENDLESS_ALL = [];
 let panelDataLoaded = false;
 let panelDataLoadFailed = false;
+let endlessDataLoaded = false;
+let endlessDataLoadFailed = false;
 let panelSampleCache = [];
 let activeOrbit = null;
 let activePartner = null;
@@ -2177,12 +2257,29 @@ function loadingMarkup() {
   return '<span class="loading-inline"><span class="loading-spinner"></span><span class="loading-text">資料載入中…</span></span>';
 }
 
-function setLoadingStage(state) {
-  const stage = document.getElementById('loadingStage');
-  const text = document.getElementById('loadingStageText');
-  if (!stage || !text) return;
-  stage.classList.toggle('is-failed', state === 'failed');
-  text.textContent = state === 'failed' ? '資料載入失敗，請重新整理頁面' : '資料載入中…';
+function updateHeaderDataStatus() {
+  const card = document.getElementById('headerDataCard');
+  const status = document.getElementById('headerDataStatus');
+  const meta = document.getElementById('headerDataMeta');
+  if (!card || !status || !meta) return;
+
+  const panelPart = panelDataLoaded
+    ? `軌道 ${DATA.length.toLocaleString('zh-TW')} 筆`
+    : panelDataLoadFailed
+      ? '軌道載入失敗'
+      : '軌道同步中';
+  const endlessPart = endlessDataLoaded
+    ? `無盡 ${ENDLESS_ALL.length.toLocaleString('zh-TW')} 筆`
+    : endlessDataLoadFailed
+      ? '無盡載入失敗'
+      : '無盡同步中';
+  const failed = panelDataLoadFailed || endlessDataLoadFailed;
+  const done = panelDataLoaded && endlessDataLoaded && !failed;
+
+  card.classList.toggle('is-done', done);
+  card.classList.toggle('is-failed', failed);
+  status.textContent = failed ? '部分資料載入失敗' : done ? '資料同步完成' : '資料同步中';
+  meta.textContent = `${panelPart}｜${endlessPart}`;
 }
 
 function revealQueryShell(delay = 0) {
@@ -2264,7 +2361,7 @@ function panelGlanceMarkup() {
   return `
     <div class="db-glance">
       <div class="db-glance-head db-glance-head-count">
-        <span class="db-glance-count">目前收錄軌道資料 ${DATA.length.toLocaleString('zh-TW')} 筆</span>
+        <span class="db-glance-count">隨機看看資料庫裡的通關紀錄</span>
       </div>
       <div class="sample-marquee">
         <div class="sample-marquee-track">
@@ -2430,6 +2527,7 @@ function parseChangelogCSV(text) {
 async function init() {
   loadLocalFolder();
   renderFolderPanel();
+  updateHeaderDataStatus();
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTfNvGSQbmwwXodVzmhuZfOAGIIE634hWTA6V1CTaQlF272v3VRJ5t_F7OfSKPH0qbBQbUSvLlQnw3x/pub?output=csv';
   const ENDLESS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTfNvGSQbmwwXodVzmhuZfOAGIIE634hWTA6V1CTaQlF272v3VRJ5t_F7OfSKPH0qbBQbUSvLlQnw3x/pub?gid=1577067344&single=true&output=csv';
   const CHANGELOG_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTfNvGSQbmwwXodVzmhuZfOAGIIE634hWTA6V1CTaQlF272v3VRJ5t_F7OfSKPH0qbBQbUSvLlQnw3x/pub?gid=1820828638&single=true&output=csv';
@@ -2438,7 +2536,6 @@ async function init() {
   const SHEET_FILE_ID = '19RqMAlpyi1g9pXyJ1azm45pxfjvxRqxJOUCdsQpHKDo';
   const DRIVE_API_KEY = 'AIzaSyAzbzHaKnhio4gomMkPm-lppgkDpBj6TIw';
 
-  setLoadingStage('loading');
   renderCards();
   document.getElementById('endlessInfo').innerHTML = loadingMarkup();
 
@@ -2448,13 +2545,14 @@ async function init() {
     DATA = parseCSV(text);
     panelDataLoaded = true;
     panelDataLoadFailed = false;
+    updateHeaderDataStatus();
     applyFilters();
     revealQueryShell(260);
   } catch (err) {
     panelDataLoaded = false;
     panelDataLoadFailed = true;
+    updateHeaderDataStatus();
     applyFilters();
-    setLoadingStage('failed');
     console.error(err);
   }
 
@@ -2477,9 +2575,15 @@ async function init() {
     const text = await res.text();
     ENDLESS_ALL = parseEndlessCSV(text);
     ENDLESS_DATA = [...ENDLESS_ALL];
+    endlessDataLoaded = true;
+    endlessDataLoadFailed = false;
     activePartner = null;
+    updateHeaderDataStatus();
     applyEndlessFilters();
   } catch (err) {
+    endlessDataLoaded = false;
+    endlessDataLoadFailed = true;
+    updateHeaderDataStatus();
     document.getElementById('endlessInfo').innerHTML = '⚠ 資料載入失敗，請重新整理頁面';
     console.error(err);
   }
