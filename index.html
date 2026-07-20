@@ -196,9 +196,12 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.95rem;
+  position: relative;
+  z-index: 10;
+  margin: 0.65rem auto 1rem;
   padding: 0;
   background: transparent;
+  text-align: center;
 }
 
 .header-data-copy {
@@ -972,7 +975,7 @@ header {
 .db-glance {
   margin: 1.45rem auto 0;
   width: 100%;
-  max-width: 760px;
+  max-width: min(980px, 100%);
   min-width: 0;
   text-align: left;
 }
@@ -995,6 +998,21 @@ header {
   font-weight: 500;
   white-space: nowrap;
 }
+.db-glance-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.db-glance-loading .loading-spinner {
+  width: 0.78rem;
+  height: 0.78rem;
+  border-width: 1.3px;
+}
 .sample-marquee {
   position: relative;
   width: 100%;
@@ -1007,13 +1025,13 @@ header {
 .sample-marquee-track {
   display: flex;
   width: max-content;
-  animation: sampleMarquee 56s linear infinite;
+  animation: sampleMarquee 72s linear infinite;
 }
 .sample-marquee-set {
   display: flex;
   flex: 0 0 auto;
-  gap: 0.625rem;
-  padding-right: 0.625rem;
+  gap: 0.875rem;
+  padding-right: 0.875rem;
 }
 .sample-marquee:hover .sample-marquee-track {
   animation-play-state: paused;
@@ -1021,69 +1039,13 @@ header {
 .sample-card {
   appearance: none;
   box-sizing: border-box;
-  min-width: 11.2rem;
-  padding: 0.62rem 0.75rem;
-  border: 1px solid rgba(150,180,240,0.16);
-  border-radius: 8px;
-  background: rgba(21,31,51,0.68);
+  flex: 0 0 19.5rem;
+  width: 19.5rem;
+  min-width: 19.5rem;
   color: var(--text-muted);
   font-family: 'Noto Sans TC', sans-serif;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
-}
-.sample-card:hover {
-  border-color: rgba(184,212,255,0.42);
-  background: rgba(184,212,255,0.07);
-  color: var(--text);
-}
-.sample-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.65rem;
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-.sample-orbit-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.sample-top-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 0 0 auto;
-}
-.sample-layer-list {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0.4rem;
-  min-height: 1.1rem;
-  margin-top: 0.45rem;
-  color: var(--text-dim);
-  font-size: 0.66rem;
-}
-.sample-layer-list.is-single {
-  grid-template-columns: minmax(0, 1fr);
-}
-.sample-layer-item {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.sample-video-pill {
-  flex: 0 0 auto;
-  padding: 0.08rem 0.42rem;
-  border: 1px solid var(--col-open-border);
-  border-radius: 999px;
-  background: var(--col-open-bg);
-  color: var(--col-open);
-  font-size: 0.62rem;
 }
 @keyframes sampleMarquee {
   from { transform: translateX(0); }
@@ -1845,7 +1807,7 @@ select.card-input option {
   }
   .header-data-card {
     width: min(100%, 24rem);
-    margin-top: 0.8rem;
+    margin: 0 auto 1rem;
     min-height: 0;
     padding: 0;
   }
@@ -2044,38 +2006,20 @@ select.card-input option {
   }
   .sample-marquee-track {
     width: max-content;
-    animation: sampleMarquee 58s linear infinite;
+    animation: sampleMarquee 74s linear infinite;
   }
   .sample-marquee-set {
-    gap: 0.45rem;
-    padding-right: 0.45rem;
+    gap: 0.65rem;
+    padding-right: 0.65rem;
   }
   .sample-marquee-set.is-duplicate {
     display: flex;
   }
   .sample-card {
-    flex: 0 0 9.4rem;
-    min-width: 9.4rem;
-    max-width: 9.4rem;
-    padding: 0.5rem 0.58rem;
-    border-radius: 7px;
-  }
-  .sample-card-top {
-    gap: 0.45rem;
-    font-size: 0.78rem;
-  }
-  .sample-top-meta {
-    gap: 0.28rem;
-  }
-  .sample-layer-list {
-    gap: 0.32rem;
-    margin-top: 0.34rem;
-    min-height: 0.95rem;
-    font-size: 0.68rem;
-  }
-  .sample-video-pill {
-    padding: 0.04rem 0.32rem;
-    font-size: 0.62rem;
+    flex: 0 0 min(18rem, calc(100vw - 6.25rem));
+    width: min(18rem, calc(100vw - 6.25rem));
+    min-width: min(18rem, calc(100vw - 6.25rem));
+    padding: 0.82rem 0.9rem;
   }
 }
 
@@ -2092,16 +2036,6 @@ select.card-input option {
     </div>
     <div class="title-divider" aria-hidden="true"></div>
   </div>
-
-  <aside class="header-data-card" id="headerDataCard" aria-live="polite">
-    <div class="header-data-copy">
-      <div class="header-data-status" id="headerDataStatus">
-        <span class="header-status-icon is-syncing" aria-hidden="true"></span>
-        <span>資料同步中</span>
-      </div>
-      <div class="header-data-meta" id="headerDataMeta">正在整理軌道與無盡挑戰資料</div>
-    </div>
-  </aside>
 </header>
 
 <div class="tab-nav site-tab-nav" aria-label="資料類型切換">
@@ -2182,6 +2116,16 @@ select.card-input option {
     </div>
   </div>
 
+  <aside class="header-data-card data-status-card" data-status-scope="panel" aria-live="polite">
+    <div class="header-data-copy">
+      <div class="header-data-status">
+        <span class="header-status-icon is-syncing" aria-hidden="true"></span>
+        <span>資料同步中</span>
+      </div>
+      <div class="header-data-meta">正在整理軌道資料</div>
+    </div>
+  </aside>
+
   <div class="results-info" id="resultsInfo"></div>
   <div class="cards-grid" id="cardsGrid"></div>
 </div>
@@ -2248,6 +2192,16 @@ select.card-input option {
       <div class="dynamic-no-match" id="endlessDynamicNoMatch">找不到完全相符的結果</div>
     </div>
   </div>
+
+  <aside class="header-data-card data-status-card" data-status-scope="endless" aria-live="polite">
+    <div class="header-data-copy">
+      <div class="header-data-status">
+        <span class="header-status-icon is-syncing" aria-hidden="true"></span>
+        <span>資料同步中</span>
+      </div>
+      <div class="header-data-meta">正在整理無盡挑戰資料</div>
+    </div>
+  </aside>
 
   <div class="results-info" id="endlessInfo"></div>
   <div class="endless-grid" id="endlessGrid"></div>
@@ -2330,36 +2284,47 @@ function loadingMarkup() {
 }
 
 function updateHeaderDataStatus() {
-  const card = document.getElementById('headerDataCard');
-  const status = document.getElementById('headerDataStatus');
-  const meta = document.getElementById('headerDataMeta');
-  if (!card || !status || !meta) return;
+  const cards = document.querySelectorAll('.data-status-card');
+  if (!cards.length) return;
 
-  const panelLabel = '<strong>軌道</strong>';
-  const endlessLabel = '<strong>無盡挑戰</strong>';
-  const panelPart = panelDataLoaded
-    ? `${panelLabel} ${DATA.length.toLocaleString('zh-TW')} 筆`
-    : panelDataLoadFailed
-      ? `${panelLabel} 載入失敗`
-      : `${panelLabel} 同步中`;
-  const endlessPart = endlessDataLoaded
-    ? `${endlessLabel} ${ENDLESS_ALL.length.toLocaleString('zh-TW')} 筆`
-    : endlessDataLoadFailed
-      ? `${endlessLabel} 載入失敗`
-      : `${endlessLabel} 同步中`;
-  const failed = panelDataLoadFailed || endlessDataLoadFailed;
-  const done = panelDataLoaded && endlessDataLoaded && !failed;
+  const scopeMap = {
+    panel: {
+      label: '<strong>軌道</strong>',
+      count: DATA.length,
+      loaded: panelDataLoaded,
+      failed: panelDataLoadFailed
+    },
+    endless: {
+      label: '<strong>無盡挑戰</strong>',
+      count: ENDLESS_ALL.length,
+      loaded: endlessDataLoaded,
+      failed: endlessDataLoadFailed
+    }
+  };
 
-  card.classList.toggle('is-done', done);
-  card.classList.toggle('is-failed', failed);
-  const statusIcon = failed
-    ? '<span class="header-status-icon is-failed" aria-hidden="true">!</span>'
-    : done
-      ? '<span class="header-status-icon is-done" aria-hidden="true">✓</span>'
-      : '<span class="header-status-icon is-syncing" aria-hidden="true"></span>';
-  const statusText = failed ? '部分資料載入失敗' : done ? '資料同步完成' : '資料同步中';
-  status.innerHTML = `${statusIcon}<span>${statusText}</span>`;
-  meta.innerHTML = `${panelPart}｜${endlessPart}`;
+  cards.forEach(card => {
+    const status = card.querySelector('.header-data-status');
+    const meta = card.querySelector('.header-data-meta');
+    const scope = scopeMap[card.dataset.statusScope || 'panel'];
+    if (!status || !meta || !scope) return;
+    const done = scope.loaded && !scope.failed;
+    const failed = scope.failed;
+    const statusIcon = failed
+      ? '<span class="header-status-icon is-failed" aria-hidden="true">!</span>'
+      : done
+        ? '<span class="header-status-icon is-done" aria-hidden="true">✓</span>'
+        : '<span class="header-status-icon is-syncing" aria-hidden="true"></span>';
+    const statusText = failed ? '資料載入失敗' : done ? '資料同步完成' : '資料同步中';
+    const metaText = failed
+      ? `${scope.label} 載入失敗`
+      : done
+        ? `${scope.label} ${scope.count.toLocaleString('zh-TW')} 筆`
+        : `${scope.label} 同步中`;
+    card.classList.toggle('is-done', done);
+    card.classList.toggle('is-failed', failed);
+    status.innerHTML = `${statusIcon}<span>${statusText}</span>`;
+    meta.innerHTML = metaText;
+  });
 }
 
 function revealQueryShell(delay = 0) {
@@ -2391,13 +2356,6 @@ function emptyStateMarkup(title, body, showSyncState = false) {
   `;
 }
 
-function samplePanelLayerEntries(d) {
-  const entries = [];
-  if (d.upperCard && d.upperCard !== 'N/A') entries.push({ label: '▲', value: d.upperCard });
-  if (d.lowerCard && d.lowerCard !== 'N/A') entries.push({ label: '▼', value: d.lowerCard });
-  return entries;
-}
-
 function getRandomPanelSamples(count = 8) {
   if (panelSampleCache.length > 0) return panelSampleCache.slice(0, count);
   const indexed = DATA.map((item, index) => ({ item, index }));
@@ -2412,22 +2370,25 @@ function getRandomPanelSamples(count = 8) {
 function panelSampleCardMarkup(sample) {
   const d = sample.item;
   const orbitLabel = ORBIT_LABEL[d.orbit] || d.orbit;
-  const layerEntries = samplePanelLayerEntries(d);
-  const layerClass = layerEntries.length <= 1 ? ' is-single' : '';
-  const layerHtml = layerEntries.length > 0
-    ? layerEntries.map(entry => `<span class="sample-layer-item">${entry.label} ${escapeHtml(entry.value)}</span>`).join('')
-    : '<span class="sample-layer-item">單層面板</span>';
+  const orbit = escapeHtml(d.orbit);
   return `
-    <button type="button" class="sample-card" onclick="openPanelSample(${sample.index})" aria-label="查看${escapeHtml(orbitLabel)}${escapeHtml(d.layer)}層資料">
-      <div class="sample-card-top">
-        <span class="sample-orbit-name">${escapeHtml(orbitLabel)}</span>
-        <span class="sample-top-meta">
-          <span>${escapeHtml(d.layer)} 層</span>
-          ${d.hasVideo ? '<span class="sample-video-pill">影片</span>' : ''}
-        </span>
+    <button type="button" class="panel-card sample-card" data-orbit="${orbit}" onclick="openPanelSample(${sample.index})" aria-label="查看${escapeHtml(orbitLabel)}${escapeHtml(d.layer)}層資料">
+      <div class="card-orbit-bar">
+        <div class="card-labels">
+          <span class="orbit-badge" data-orbit="${orbit}">${escapeHtml(orbitLabel)}</span>
+          ${d.hasVideo ? '<span class="video-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> 附影片</span>' : ''}
+        </div>
+        <div class="card-meta-right">
+          <span class="layer-num">${escapeHtml(d.layer)} 層</span>
+        </div>
       </div>
-      <div class="sample-layer-list${layerClass}">
-        ${layerHtml}
+      <div class="layer-section">
+        ${cardLayerBlock(d.upperCard, d.upperPartner, d.upperDir, '▲ 上層')}
+        ${cardLayerBlock(d.lowerCard, d.lowerPartner, d.lowerDir, '▼ 下層')}
+      </div>
+      <div class="card-footer">
+        <span></span>
+        <span class="link-hint">點擊查看詳情 →</span>
       </div>
     </button>
   `;
@@ -2457,7 +2418,7 @@ function panelInitialStateMarkup() {
   const glance = panelGlanceMarkup();
   return `
     <div class="empty-state db-overview-state" style="grid-column:1/-1">
-      ${glance || '<div class="empty-state-title">資料整理中</div>'}
+      ${glance || '<div class="db-glance-loading"><span class="loading-spinner"></span><span>資料載入中</span></div>'}
     </div>
   `;
 }
