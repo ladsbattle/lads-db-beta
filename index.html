@@ -193,6 +193,7 @@ header {
 .header-data-card {
   width: min(34rem, 100%);
   min-height: 0;
+  max-height: 4rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,6 +203,17 @@ header {
   padding: 0;
   background: transparent;
   text-align: center;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.22s ease, max-height 0.22s ease, margin 0.22s ease;
+}
+
+.data-status-card.is-hidden {
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .header-data-copy {
@@ -969,6 +981,11 @@ header {
 .db-overview-state {
   padding: 1.45rem 1rem 1.55rem;
 }
+.db-overview-placeholder {
+  min-height: 8.5rem;
+  grid-column: 1 / -1;
+  pointer-events: none;
+}
 .db-overview-state .db-glance {
   margin-top: 0;
 }
@@ -997,21 +1014,6 @@ header {
   color: var(--text);
   font-weight: 500;
   white-space: nowrap;
-}
-.db-glance-loading {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  color: var(--text-muted);
-  font-size: 0.86rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-}
-.db-glance-loading .loading-spinner {
-  width: 0.78rem;
-  height: 0.78rem;
-  border-width: 1.3px;
 }
 .sample-marquee {
   position: relative;
@@ -1964,6 +1966,9 @@ select.card-input option {
   .db-overview-state {
     padding: 1.05rem 0.75rem 1.15rem;
   }
+  .db-overview-placeholder {
+    min-height: 6rem;
+  }
   .empty-state-title {
     font-size: 0.84rem;
   }
@@ -2327,6 +2332,11 @@ function updateHeaderDataStatus() {
   });
 }
 
+function setDataStatusVisible(scope, visible) {
+  const card = document.querySelector(`.data-status-card[data-status-scope="${scope}"]`);
+  if (card) card.classList.toggle('is-hidden', !visible);
+}
+
 function revealQueryShell(delay = 0) {
   window.setTimeout(() => {
     document.body.classList.add('app-ready');
@@ -2416,9 +2426,10 @@ function panelGlanceMarkup() {
 
 function panelInitialStateMarkup() {
   const glance = panelGlanceMarkup();
+  if (!glance) return '<div class="db-overview-placeholder" style="grid-column:1/-1"></div>';
   return `
     <div class="empty-state db-overview-state" style="grid-column:1/-1">
-      ${glance || '<div class="db-glance-loading"><span class="loading-spinner"></span><span>資料載入中</span></div>'}
+      ${glance}
     </div>
   `;
 }
@@ -3223,25 +3234,30 @@ function setPanelResultsContent(stateKey, infoHtml, gridHtml) {
 
 function renderCards() {
   if (!panelQueryStarted()) {
+    setDataStatusVisible('panel', true);
     renderDynamicFilters([], null);
     const grid = document.getElementById('cardsGrid');
     const promptOverviewReady = panelDataLoaded && !panelDataLoadFailed && DATA.length > 0;
-    if (panelRenderStateKey === 'prompt' && promptOverviewReady && grid?.querySelector('.db-glance')) {
+    const promptStateKey = promptOverviewReady ? 'prompt-ready' : 'prompt-loading';
+    if (panelRenderStateKey === promptStateKey && promptOverviewReady && grid?.querySelector('.db-glance')) {
       updateScrollButtons();
       return;
     }
-    setPanelResultsContent('prompt', '', panelInitialStateMarkup());
+    setPanelResultsContent(promptStateKey, '', panelInitialStateMarkup());
     return;
   }
   if (panelDataLoadFailed) {
+    setDataStatusVisible('panel', true);
     renderDynamicFilters([], null);
     setPanelResultsContent('failed', '⚠ 資料載入失敗，請重新整理頁面', '');
     return;
   }
   if (!panelDataLoaded) {
+    setDataStatusVisible('panel', true);
     setPanelResultsContent('loading', loadingMarkup(), '');
     return;
   }
+  setDataStatusVisible('panel', false);
   const infoHtml = `共找到 <span>${currentData.length}</span> 筆結果`;
   if (currentData.length === 0) {
     setPanelResultsContent('empty', infoHtml, emptyStateMarkup('找不到符合條件的結果', '期待您成為第一位分享者，或嘗試放寬目前的篩選條件。'));
@@ -3429,6 +3445,7 @@ function fmtScore(s) {
 function renderEndless() {
   const grid = document.getElementById('endlessGrid');
   const info = document.getElementById('endlessInfo');
+  setDataStatusVisible('endless', !(endlessDataLoaded && !endlessDataLoadFailed));
   info.innerHTML = `共找到 <span>${ENDLESS_DATA.length}</span> 筆結果`;
   if (ENDLESS_DATA.length === 0) {
     grid.innerHTML = emptyStateMarkup('找不到符合條件的結果', '期待您成為第一位分享者，或嘗試放寬目前的篩選條件。');
