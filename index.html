@@ -624,6 +624,10 @@ header {
   width: 320px;
   flex: 0 0 320px;
 }
+.panel-preview .endless-card {
+  width: 300px;
+  flex: 0 0 300px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .panel-preview-viewport {
@@ -1570,6 +1574,10 @@ select.card-input option {
     width: min(78vw, 300px);
     flex-basis: min(78vw, 300px);
   }
+  .panel-preview .endless-card {
+    width: min(78vw, 290px);
+    flex-basis: min(78vw, 290px);
+  }
   .endless-grid { grid-template-columns: 1fr; }
 
   /* tab nav fits smaller screens */
@@ -1792,8 +1800,9 @@ let layerOK = true;
 let currentData = [];
 let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
-let panelPreviewAutoFrame = null;
-let panelPreviewLastTime = 0;
+let endlessPreviewData = [];
+let previewAutoFrame = null;
+let previewLastTime = 0;
 const PANEL_PREVIEW_SPEED = 0.075;
 const CONTENT_FADE_MS = 150;
 const fadeTimers = {};
@@ -1952,6 +1961,7 @@ async function init() {
     const text = await res.text();
     ENDLESS_ALL = parseEndlessCSV(text);
     ENDLESS_DATA = [...ENDLESS_ALL];
+    endlessPreviewData = sampleEndlessPreviewData();
     activePartner = null;
     applyEndlessFilters();
   } catch (err) {
@@ -2526,11 +2536,27 @@ function samplePanelPreviewData(count = 10) {
   return pool.slice(0, Math.min(count, pool.length));
 }
 
+function sampleEndlessPreviewData(count = 10) {
+  const pool = [...ENDLESS_ALL];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(count, pool.length));
+}
+
 function getPanelPreviewData() {
   if (panelPreviewData.length === 0 && DATA.length > 0) {
     panelPreviewData = samplePanelPreviewData();
   }
   return panelPreviewData;
+}
+
+function getEndlessPreviewData() {
+  if (endlessPreviewData.length === 0 && ENDLESS_ALL.length > 0) {
+    endlessPreviewData = sampleEndlessPreviewData();
+  }
+  return endlessPreviewData;
 }
 
 function hasPanelFilters() {
@@ -2540,15 +2566,6 @@ function hasPanelFilters() {
     (videoOnly && videoOnly.checked) ||
     activeLayerFilters.upper.length > 0 ||
     activeLayerFilters.lower.length > 0
-  );
-}
-
-function hasEndlessFilters() {
-  const videoOnly = document.getElementById('endlessVideoOnly');
-  return Boolean(
-    activePartner ||
-    activeEndlessCard ||
-    (videoOnly && videoOnly.checked)
   );
 }
 
@@ -2582,6 +2599,11 @@ function openPanelPreview(idx) {
   if (item) openPanelDetail(item);
 }
 
+function openEndlessPreview(idx) {
+  const item = endlessPreviewData[idx];
+  if (item) openEndlessDetail(item);
+}
+
 function renderPanelPreview() {
   const grid = document.getElementById('cardsGrid');
   const previewData = getPanelPreviewData();
@@ -2599,18 +2621,18 @@ function renderPanelPreview() {
         </div>
       </div>
     </div>`;
-  setupPanelPreviewScroll();
+  setupPreviewScroll('#section-panel.active .panel-preview-viewport', previewData.length);
   updateScrollButtons();
 }
 
-function stopPanelPreviewAutoScroll() {
-  if (!panelPreviewAutoFrame) return;
-  window.cancelAnimationFrame(panelPreviewAutoFrame);
-  panelPreviewAutoFrame = null;
+function stopPreviewAutoScroll() {
+  if (!previewAutoFrame) return;
+  window.cancelAnimationFrame(previewAutoFrame);
+  previewAutoFrame = null;
 }
 
-function setupPanelPreviewScroll() {
-  const viewport = document.querySelector('.panel-preview-viewport');
+function setupPreviewScroll(selector, itemCount) {
+  const viewport = document.querySelector(selector);
   if (!viewport) return;
   let startX = 0;
   let startScrollLeft = 0;
@@ -2618,12 +2640,12 @@ function setupPanelPreviewScroll() {
   let moved = false;
   let wrapping = false;
 
-  stopPanelPreviewAutoScroll();
+  stopPreviewAutoScroll();
 
   const getLoopWidth = () => viewport.scrollWidth / 3;
 
   const wrapScrollPosition = () => {
-    if (wrapping || panelPreviewData.length <= 1) return;
+    if (wrapping || itemCount <= 1) return;
     const loopWidth = getLoopWidth();
     if (!loopWidth) return;
     wrapping = true;
@@ -2673,19 +2695,19 @@ function setupPanelPreviewScroll() {
   }, true);
 
   requestAnimationFrame(() => {
-    if (panelPreviewData.length <= 1) return;
+    if (itemCount <= 1) return;
     viewport.scrollLeft = getLoopWidth();
-    panelPreviewLastTime = performance.now();
+    previewLastTime = performance.now();
     const autoScroll = time => {
-      const elapsed = Math.min(time - panelPreviewLastTime, 80);
-      panelPreviewLastTime = time;
+      const elapsed = Math.min(time - previewLastTime, 80);
+      previewLastTime = time;
       if (!document.hidden) {
         viewport.scrollLeft += elapsed * PANEL_PREVIEW_SPEED;
         wrapScrollPosition();
       }
-      panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
+      previewAutoFrame = window.requestAnimationFrame(autoScroll);
     };
-    panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
+    previewAutoFrame = window.requestAnimationFrame(autoScroll);
   });
 }
 
@@ -2717,7 +2739,7 @@ function renderCards() {
       renderPanelPreview();
       return;
     }
-    stopPanelPreviewAutoScroll();
+    stopPreviewAutoScroll();
     if (currentData.length === 0) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
       return;
@@ -2777,6 +2799,16 @@ function openModal(idx) {
   openPanelDetail(currentData[idx]);
 }
 
+function restartActivePreview(tab) {
+  if (tab === 'panel' && !hasPanelFilters()) {
+    setupPreviewScroll('#section-panel.active .panel-preview-viewport', getPanelPreviewData().length);
+  } else if (tab === 'endless' && !activePartner) {
+    setupPreviewScroll('#section-endless.active .panel-preview-viewport', getEndlessPreviewData().length);
+  } else {
+    stopPreviewAutoScroll();
+  }
+}
+
 function switchTab(tab, btn) {
   const nextSection = document.getElementById('section-' + tab);
   const currentSection = document.querySelector('.section.active');
@@ -2796,6 +2828,7 @@ function switchTab(tab, btn) {
     nextSection.classList.add('active', 'content-transition', 'is-fading');
     window.requestAnimationFrame(() => {
       nextSection.classList.remove('is-fading');
+      restartActivePreview(tab);
       updateScrollButtons();
     });
     tabFadeTimer = null;
@@ -2881,47 +2914,76 @@ function fmtScore(s) {
   return n.toLocaleString();
 }
 
+function endlessCardMarkup(d, action) {
+  const partner = escapeHtml(d.partner);
+  const card = escapeHtml(d.card);
+  const combo = escapeHtml(d.combo);
+  return `
+    <div class="endless-card" data-partner="${partner}" onclick="${action}">
+      <div class="endless-card-header">
+        <div class="card-labels">
+          <span class="partner-badge" data-partner="${partner}">${partner}</span>
+          ${d.hasVideo ? '<span class="video-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> 附影片</span>' : ''}
+        </div>
+        <div class="card-meta-right">
+          <span class="endless-score">${escapeHtml(fmtScore(d.score))} 分</span>
+        </div>
+      </div>
+      <div class="endless-info-row">
+        <span class="endless-info-label">日卡</span>
+        <span class="endless-info-val">${card}</span>
+      </div>
+      <div class="endless-info-row">
+        <span class="endless-info-label">對譜數</span>
+        <span class="combo-tag">${combo} 譜</span>
+      </div>
+      <div class="endless-footer">
+        <span></span>
+        <span class="link-hint">點擊查看詳情 →</span>
+      </div>
+    </div>`;
+}
+
+function renderEndlessPreview() {
+  const grid = document.getElementById('endlessGrid');
+  const previewData = getEndlessPreviewData();
+  if (previewData.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>目前尚無無盡挑戰資料</p></div>`;
+    updateScrollButtons();
+    return;
+  }
+  const loopData = previewData.length > 1 ? [...previewData, ...previewData, ...previewData] : previewData;
+  grid.innerHTML = `
+    <div class="panel-preview">
+      <div class="panel-preview-viewport">
+        <div class="panel-preview-track">
+          ${loopData.map((d, i) => endlessCardMarkup(d, `openEndlessPreview(${i % previewData.length})`)).join('')}
+        </div>
+      </div>
+    </div>`;
+  setupPreviewScroll('#section-endless.active .panel-preview-viewport', previewData.length);
+  updateScrollButtons();
+}
+
 function renderEndless() {
   const grid = document.getElementById('endlessGrid');
   const info = document.getElementById('endlessInfo');
-  const infoText = hasEndlessFilters()
+  const hasFixedResults = Boolean(activePartner);
+  const infoText = hasFixedResults
     ? `共找到 <span>${ENDLESS_DATA.length}</span> 筆結果`
     : `目前收錄無盡挑戰資料 <span>${ENDLESS_ALL.length}</span> 筆`;
   fadeSwap('endless-results', [info, grid], () => {
     info.innerHTML = infoText;
+    if (!hasFixedResults) {
+      renderEndlessPreview();
+      return;
+    }
+    stopPreviewAutoScroll();
     if (ENDLESS_DATA.length === 0) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
       return;
     }
-    grid.innerHTML = ENDLESS_DATA.map((d, i) => {
-      const partner = escapeHtml(d.partner);
-      const card = escapeHtml(d.card);
-      const combo = escapeHtml(d.combo);
-      return `
-      <div class="endless-card" data-partner="${partner}" onclick="openEndlessModal(${i})">
-        <div class="endless-card-header">
-          <div class="card-labels">
-            <span class="partner-badge" data-partner="${partner}">${partner}</span>
-            ${d.hasVideo ? '<span class="video-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> 附影片</span>' : ''}
-          </div>
-          <div class="card-meta-right">
-            <span class="endless-score">${escapeHtml(fmtScore(d.score))} 分</span>
-          </div>
-        </div>
-        <div class="endless-info-row">
-          <span class="endless-info-label">日卡</span>
-          <span class="endless-info-val">${card}</span>
-        </div>
-        <div class="endless-info-row">
-          <span class="endless-info-label">對譜數</span>
-          <span class="combo-tag">${combo} 譜</span>
-        </div>
-        <div class="endless-footer">
-          <span></span>
-          <span class="link-hint">點擊查看詳情 →</span>
-        </div>
-      </div>`;
-    }).join('');
+    grid.innerHTML = ENDLESS_DATA.map((d, i) => endlessCardMarkup(d, `openEndlessModal(${i})`)).join('');
   }, updateScrollButtons);
 }
 
