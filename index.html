@@ -614,9 +614,6 @@ header {
 .panel-preview-viewport::-webkit-scrollbar {
   display: none;
 }
-.panel-preview-viewport.is-interacting {
-  cursor: grabbing;
-}
 .panel-preview-track {
   display: flex;
   width: max-content;
@@ -1797,7 +1794,7 @@ let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
 let panelPreviewAutoFrame = null;
 let panelPreviewLastTime = 0;
-const PANEL_PREVIEW_SPEED = 0.042;
+const PANEL_PREVIEW_SPEED = 0.075;
 const CONTENT_FADE_MS = 150;
 const fadeTimers = {};
 let tabFadeTimer = null;
@@ -2617,8 +2614,8 @@ function setupPanelPreviewScroll() {
   if (!viewport) return;
   let startX = 0;
   let startScrollLeft = 0;
+  let isMouseDragging = false;
   let moved = false;
-  let pauseTimer = null;
   let wrapping = false;
 
   stopPanelPreviewAutoScroll();
@@ -2638,47 +2635,36 @@ function setupPanelPreviewScroll() {
     wrapping = false;
   };
 
-  const pauseBriefly = (duration = 1000) => {
-    viewport.classList.add('is-interacting');
-    window.clearTimeout(pauseTimer);
-    pauseTimer = window.setTimeout(() => {
-      viewport.classList.remove('is-interacting');
-    }, duration);
-  };
-
   viewport.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'mouse') return;
+    isMouseDragging = true;
     moved = false;
     startX = event.clientX;
     startScrollLeft = viewport.scrollLeft;
-    pauseBriefly(1600);
-    if (event.pointerType === 'mouse') {
-      viewport.setPointerCapture(event.pointerId);
-    }
+    viewport.setPointerCapture(event.pointerId);
   });
 
   viewport.addEventListener('pointermove', event => {
-    if (event.pointerType !== 'mouse' || !viewport.hasPointerCapture(event.pointerId)) return;
+    if (!isMouseDragging || event.pointerType !== 'mouse' || !viewport.hasPointerCapture(event.pointerId)) return;
     const delta = event.clientX - startX;
     if (Math.abs(delta) > 4) moved = true;
     viewport.scrollLeft = startScrollLeft - delta;
     wrapScrollPosition();
-    pauseBriefly(1600);
   });
 
   viewport.addEventListener('pointerup', event => {
+    if (event.pointerType !== 'mouse') return;
+    isMouseDragging = false;
     if (event.pointerType === 'mouse' && viewport.hasPointerCapture(event.pointerId)) {
       viewport.releasePointerCapture(event.pointerId);
     }
-    pauseBriefly();
   });
 
-  viewport.addEventListener('pointercancel', () => pauseBriefly());
+  viewport.addEventListener('pointercancel', event => {
+    if (event.pointerType !== 'mouse') return;
+    isMouseDragging = false;
+  });
   viewport.addEventListener('scroll', wrapScrollPosition, { passive: true });
-  viewport.addEventListener('wheel', () => pauseBriefly(), { passive: true });
-  viewport.addEventListener('touchstart', () => pauseBriefly(1600), { passive: true });
-  viewport.addEventListener('touchmove', () => pauseBriefly(1600), { passive: true });
-  viewport.addEventListener('touchend', () => pauseBriefly(), { passive: true });
-  viewport.addEventListener('touchcancel', () => pauseBriefly(), { passive: true });
   viewport.addEventListener('click', event => {
     if (!moved) return;
     event.preventDefault();
@@ -2693,7 +2679,7 @@ function setupPanelPreviewScroll() {
     const autoScroll = time => {
       const elapsed = Math.min(time - panelPreviewLastTime, 80);
       panelPreviewLastTime = time;
-      if (!document.hidden && !viewport.classList.contains('is-interacting')) {
+      if (!document.hidden) {
         viewport.scrollLeft += elapsed * PANEL_PREVIEW_SPEED;
         wrapScrollPosition();
       }
