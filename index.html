@@ -655,6 +655,8 @@ header {
   height: 2px;
   opacity: 0;
   transition: opacity 0.25s;
+  z-index: 5;
+  pointer-events: none;
 }
 .panel-card:hover { background: var(--card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 .panel-card:hover::before { opacity: 1; }
@@ -665,8 +667,8 @@ header {
   right: 0;
   width: 2.75rem;
   height: 2.75rem;
-  border-top-right-radius: inherit;
-  z-index: 4;
+  border-top-right-radius: 9px;
+  z-index: 3;
   pointer-events: none;
   overflow: hidden;
 }
@@ -883,7 +885,7 @@ header {
   right: 0;
   width: 3.7rem;
   height: 3.7rem;
-  border-top-right-radius: 14px;
+  border-top-right-radius: 13px;
   background: linear-gradient(45deg, transparent 49%, rgba(216,230,251,0.3) 50%);
   z-index: 0;
   pointer-events: none;
@@ -1313,6 +1315,8 @@ header {
   height: 2px;
   opacity: 0;
   transition: opacity 0.25s;
+  z-index: 5;
+  pointer-events: none;
 }
 .endless-card:hover { background: var(--card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 .endless-card:hover::before { opacity: 1; }
@@ -1746,6 +1750,7 @@ select.card-input option {
   .viewed-card .viewed-corner {
     width: 2.45rem;
     height: 2.45rem;
+    border-top-right-radius: 9px;
   }
   .viewed-card .viewed-corner span {
     top: 0.66rem;
@@ -1760,6 +1765,7 @@ select.card-input option {
   .modal.viewed-detail::before {
     width: 3.15rem;
     height: 3.15rem;
+    border-top-right-radius: 13px;
   }
   .modal.viewed-detail::after {
     top: 0.77rem;
