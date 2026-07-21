@@ -2801,11 +2801,26 @@ function setupPreviewScroll(selector, itemCount) {
   let startY = 0;
   let startScrollLeft = 0;
   let isMouseDragging = false;
+  let isAutoPaused = false;
+  let resumeAutoTimer = null;
   let moved = false;
   let pressedPreviewCard = null;
   let wrapping = false;
 
   stopPreviewAutoScroll();
+
+  const pauseAutoScroll = () => {
+    isAutoPaused = true;
+    window.clearTimeout(resumeAutoTimer);
+  };
+
+  const resumeAutoScroll = (delay = 700) => {
+    window.clearTimeout(resumeAutoTimer);
+    resumeAutoTimer = window.setTimeout(() => {
+      isAutoPaused = false;
+      previewLastTime = performance.now();
+    }, delay);
+  };
 
   const getLoopWidth = () => viewport.scrollWidth / 3;
 
@@ -2823,6 +2838,7 @@ function setupPreviewScroll(selector, itemCount) {
   };
 
   viewport.addEventListener('pointerdown', event => {
+    pauseAutoScroll();
     moved = false;
     startX = event.clientX;
     startY = event.clientY;
@@ -2851,6 +2867,7 @@ function setupPreviewScroll(selector, itemCount) {
       if (pressedPreviewCard.dataset.previewType === 'endless') openEndlessPreview(idx);
     }
     pressedPreviewCard = null;
+    resumeAutoScroll();
     if (event.pointerType !== 'mouse') return;
     isMouseDragging = false;
     if (viewport.hasPointerCapture(event.pointerId)) {
@@ -2860,9 +2877,14 @@ function setupPreviewScroll(selector, itemCount) {
 
   viewport.addEventListener('pointercancel', event => {
     pressedPreviewCard = null;
+    resumeAutoScroll();
     if (event.pointerType !== 'mouse') return;
     isMouseDragging = false;
   });
+  viewport.addEventListener('mouseenter', pauseAutoScroll);
+  viewport.addEventListener('mouseleave', () => resumeAutoScroll());
+  viewport.addEventListener('focusin', pauseAutoScroll);
+  viewport.addEventListener('focusout', () => resumeAutoScroll());
   viewport.addEventListener('scroll', wrapScrollPosition, { passive: true });
   viewport.addEventListener('click', event => {
     if (!moved) return;
@@ -2878,7 +2900,7 @@ function setupPreviewScroll(selector, itemCount) {
     const autoScroll = time => {
       const elapsed = Math.min(time - previewLastTime, 80);
       previewLastTime = time;
-      if (!document.hidden) {
+      if (!document.hidden && !isAutoPaused) {
         viewport.scrollLeft += elapsed * PANEL_PREVIEW_SPEED;
         wrapScrollPosition();
       }
