@@ -557,12 +557,10 @@ header {
 .results-info span { color: var(--accent); }
 .content-transition {
   opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.18s ease;
 }
 .content-transition.is-fading {
   opacity: 0;
-  transform: translateY(4px);
 }
 .loading-inline {
   display: inline-flex;
@@ -1636,7 +1634,7 @@ select.card-input option {
       <div class="filter-group layer-group">
         <label>軌道層數</label>
         <div class="ios-input-shell">
-          <input class="layer-input" type="number" id="layerInput" placeholder="請先選軌道" min="1" oninput="onLayerInput()" disabled>
+          <input class="layer-input" type="number" id="layerInput" placeholder="請先選擇軌道" min="1" oninput="onLayerInput()" disabled>
         </div>
         <div class="layer-error-msg" id="layerError">輸入內容無效</div>
       </div>
@@ -1797,9 +1795,9 @@ let layerOK = true;
 let currentData = [];
 let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
-let panelPreviewAutoTimer = null;
-const PANEL_PREVIEW_STEP = 1;
-const PANEL_PREVIEW_INTERVAL = 45;
+let panelPreviewAutoFrame = null;
+let panelPreviewLastTime = 0;
+const PANEL_PREVIEW_SPEED = 0.042;
 const CONTENT_FADE_MS = 150;
 const fadeTimers = {};
 let tabFadeTimer = null;
@@ -2009,7 +2007,7 @@ function updateLayerInputState() {
   if (!inp) return;
   const locked = !activeOrbit;
   inp.disabled = locked;
-  inp.placeholder = locked ? '請先選軌道' : '輸入層數';
+  inp.placeholder = locked ? '請先選擇軌道' : '輸入層數';
 }
 
 function validateLayer() {
@@ -2609,9 +2607,9 @@ function renderPanelPreview() {
 }
 
 function stopPanelPreviewAutoScroll() {
-  if (!panelPreviewAutoTimer) return;
-  window.clearInterval(panelPreviewAutoTimer);
-  panelPreviewAutoTimer = null;
+  if (!panelPreviewAutoFrame) return;
+  window.cancelAnimationFrame(panelPreviewAutoFrame);
+  panelPreviewAutoFrame = null;
 }
 
 function setupPanelPreviewScroll() {
@@ -2691,11 +2689,17 @@ function setupPanelPreviewScroll() {
   requestAnimationFrame(() => {
     if (panelPreviewData.length <= 1) return;
     viewport.scrollLeft = getLoopWidth();
-    panelPreviewAutoTimer = window.setInterval(() => {
-      if (document.hidden || viewport.classList.contains('is-interacting')) return;
-      viewport.scrollLeft += PANEL_PREVIEW_STEP;
-      wrapScrollPosition();
-    }, PANEL_PREVIEW_INTERVAL);
+    panelPreviewLastTime = performance.now();
+    const autoScroll = time => {
+      const elapsed = Math.min(time - panelPreviewLastTime, 80);
+      panelPreviewLastTime = time;
+      if (!document.hidden && !viewport.classList.contains('is-interacting')) {
+        viewport.scrollLeft += elapsed * PANEL_PREVIEW_SPEED;
+        wrapScrollPosition();
+      }
+      panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
+    };
+    panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
   });
 }
 
