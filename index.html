@@ -914,18 +914,22 @@ header {
 
 .modal-close {
   position: absolute;
-  top: 1rem; right: 1rem;
-  background: none; border: none;
+  top: 1.05rem;
+  right: 1.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid transparent;
+  border-radius: 999px;
   color: var(--text-muted); cursor: pointer;
-  font-size: 1.2rem; line-height: 1;
-  transition: color 0.2s;
+  font-size: 1.55rem; line-height: 1;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
   z-index: 5;
 }
-.modal-close:hover { color: var(--text); }
-
-.modal.viewed-detail .modal-close {
-  right: 3.95rem;
-}
+.modal-close:hover { color: var(--text); border-color: var(--border); background: rgba(255,255,255,0.06); }
 
 .modal-actions-slot {
   display: none;
@@ -998,12 +1002,19 @@ header {
 .modal-footer-actions {
   display: flex;
   align-items: stretch;
-  gap: 0.55rem;
+  gap: 0.6rem;
 }
 
 .modal-footer-actions .btn-fb {
-  flex: 1 1 auto;
-  min-height: 2.65rem;
+  flex: 1 1 12rem;
+  min-height: 2.7rem;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  background: rgba(89,132,164,0.68);
+  border-color: rgba(147,199,231,0.68);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
 }
 
 .modal-secondary-actions {
@@ -1015,22 +1026,43 @@ header {
 
 .modal-footer-actions .save-card-btn,
 .modal-footer-actions .btn-report {
-  width: 4.8rem;
-  min-height: 2.65rem;
+  width: 5.25rem;
+  min-height: 2.7rem;
   box-sizing: border-box;
   justify-content: center;
-  gap: 0.28rem;
-  padding: 0 0.55rem;
-  border-radius: 999px;
+  gap: 0.32rem;
+  padding: 0 0.6rem;
+  border-radius: 10px;
   font-size: 0.72rem;
   line-height: 1;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.035);
   letter-spacing: 0;
 }
 
 .modal-footer-actions .btn-report {
   color: var(--text-muted);
   border-color: var(--border);
+}
+
+.modal-footer-actions .btn-fb:hover {
+  background: rgba(89,132,164,0.82);
+  border-color: rgba(147,199,231,0.82);
+}
+
+.modal-footer-actions .save-card-btn:hover,
+.modal-footer-actions .save-card-btn.saved,
+.modal-footer-actions .btn-report:hover {
+  border-color: var(--border-bright);
+  background: rgba(184,212,255,0.13);
+  color: var(--text);
+}
+
+.modal-footer-actions .save-card-btn svg,
+.modal-footer-actions .btn-report svg,
+.modal-footer-actions .fb-outline-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .info-modal {
@@ -1712,20 +1744,31 @@ select.card-input option {
     width: 3.55rem;
     font-size: 0.5rem;
   }
-  .modal.viewed-detail .modal-close {
-    right: 3.45rem;
+  .modal-close {
+    top: 0.95rem;
+    right: 1rem;
+    width: 2.15rem;
+    height: 2.15rem;
+    font-size: 1.45rem;
   }
   .modal-footer-actions {
     flex-direction: column;
+    gap: 0.55rem;
+  }
+  .modal-footer-actions .btn-fb {
+    flex: none;
+    width: 100%;
+    min-height: 2.55rem;
   }
   .modal-secondary-actions {
     width: 100%;
+    gap: 0.55rem;
   }
   .modal-secondary-actions .save-card-btn,
   .modal-secondary-actions .btn-report {
     flex: 1 1 0;
     width: auto;
-    min-height: 2.45rem;
+    min-height: 2.5rem;
   }
   .endless-grid { grid-template-columns: 1fr; }
 
@@ -2482,7 +2525,9 @@ function modalFooterActions(link, folderItem, reportUrl) {
   return `
     <div class="modal-footer-actions">
       <a href="${escapeHtml(safeExternalUrl(link))}" target="_blank" rel="noopener" class="btn-fb">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        <svg class="fb-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15.5 4.5h-2.2c-2.1 0-3.3 1.3-3.3 3.4V10H8v3h2v6.5h3V13h2.1l0.5-3H13V8.1c0-0.9 0.4-1.4 1.4-1.4h1.1V4.5z"/>
+        </svg>
         前往Facebook查看
       </a>
       <div class="modal-secondary-actions">
