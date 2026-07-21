@@ -1750,10 +1750,9 @@ let layerOK = true;
 let currentData = [];
 let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
-let panelPreviewAutoFrame = null;
-let panelPreviewLastTime = 0;
-let panelPreviewAutoPosition = 0;
-const PANEL_PREVIEW_AUTO_SPEED = 0.045;
+let panelPreviewAutoTimer = null;
+const PANEL_PREVIEW_STEP = 1;
+const PANEL_PREVIEW_INTERVAL = 45;
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
 let CHANGELOG_DATA = [];
@@ -2519,9 +2518,9 @@ function renderPanelPreview() {
 }
 
 function stopPanelPreviewAutoScroll() {
-  if (!panelPreviewAutoFrame) return;
-  window.cancelAnimationFrame(panelPreviewAutoFrame);
-  panelPreviewAutoFrame = null;
+  if (!panelPreviewAutoTimer) return;
+  window.clearInterval(panelPreviewAutoTimer);
+  panelPreviewAutoTimer = null;
 }
 
 function setupPanelPreviewScroll() {
@@ -2530,65 +2529,42 @@ function setupPanelPreviewScroll() {
   let startX = 0;
   let startScrollLeft = 0;
   let moved = false;
-  let releaseTimer = null;
+  let pauseTimer = null;
   let wrapping = false;
-  let isDragging = false;
-  let pauseUntil = 0;
-  let dragStartedAt = 0;
 
   stopPanelPreviewAutoScroll();
 
   const getLoopWidth = () => viewport.scrollWidth / 3;
 
   const wrapScrollPosition = () => {
-    if (wrapping || panelPreviewData.length <= 1) {
-      panelPreviewAutoPosition = viewport.scrollLeft;
-      return;
-    }
+    if (wrapping || panelPreviewData.length <= 1) return;
     const loopWidth = getLoopWidth();
     if (!loopWidth) return;
     wrapping = true;
-    let nextScrollLeft = viewport.scrollLeft;
-    if (nextScrollLeft < loopWidth * 0.5) {
-      nextScrollLeft += loopWidth;
-    } else if (nextScrollLeft > loopWidth * 1.5) {
-      nextScrollLeft -= loopWidth;
+    if (viewport.scrollLeft < loopWidth * 0.5) {
+      viewport.scrollLeft += loopWidth;
+    } else if (viewport.scrollLeft > loopWidth * 1.5) {
+      viewport.scrollLeft -= loopWidth;
     }
-    if (nextScrollLeft !== viewport.scrollLeft) {
-      viewport.scrollLeft = nextScrollLeft;
-    }
-    panelPreviewAutoPosition = nextScrollLeft;
     wrapping = false;
   };
 
-  const pauseBriefly = (duration = 900) => {
-    pauseUntil = performance.now() + duration;
+  const pauseBriefly = (duration = 1000) => {
     viewport.classList.add('is-interacting');
-    window.clearTimeout(releaseTimer);
-    releaseTimer = window.setTimeout(() => {
+    window.clearTimeout(pauseTimer);
+    pauseTimer = window.setTimeout(() => {
       viewport.classList.remove('is-interacting');
     }, duration);
   };
 
-  const release = () => {
-    isDragging = false;
-    panelPreviewAutoPosition = viewport.scrollLeft;
-    pauseBriefly();
-  };
-
   viewport.addEventListener('pointerdown', event => {
-    viewport.classList.add('is-interacting');
-    pauseUntil = Infinity;
-    isDragging = true;
-    dragStartedAt = performance.now();
     moved = false;
     startX = event.clientX;
     startScrollLeft = viewport.scrollLeft;
+    pauseBriefly(1600);
     if (event.pointerType === 'mouse') {
       viewport.setPointerCapture(event.pointerId);
     }
-    window.addEventListener('pointerup', release, { once: true });
-    window.addEventListener('pointercancel', release, { once: true });
   });
 
   viewport.addEventListener('pointermove', event => {
@@ -2596,29 +2572,24 @@ function setupPanelPreviewScroll() {
     const delta = event.clientX - startX;
     if (Math.abs(delta) > 4) moved = true;
     viewport.scrollLeft = startScrollLeft - delta;
-    panelPreviewAutoPosition = viewport.scrollLeft;
     wrapScrollPosition();
+    pauseBriefly(1600);
   });
 
   viewport.addEventListener('pointerup', event => {
     if (event.pointerType === 'mouse' && viewport.hasPointerCapture(event.pointerId)) {
       viewport.releasePointerCapture(event.pointerId);
     }
-    release();
+    pauseBriefly();
   });
 
-  viewport.addEventListener('pointercancel', release);
+  viewport.addEventListener('pointercancel', () => pauseBriefly());
   viewport.addEventListener('scroll', wrapScrollPosition, { passive: true });
-  viewport.addEventListener('wheel', () => {
-    panelPreviewAutoPosition = viewport.scrollLeft;
-    pauseBriefly(1000);
-  }, { passive: true });
-  viewport.addEventListener('touchstart', () => {
-    pauseUntil = Infinity;
-    viewport.classList.add('is-interacting');
-  }, { passive: true });
-  viewport.addEventListener('touchend', release, { passive: true });
-  viewport.addEventListener('touchcancel', release, { passive: true });
+  viewport.addEventListener('wheel', () => pauseBriefly(), { passive: true });
+  viewport.addEventListener('touchstart', () => pauseBriefly(1600), { passive: true });
+  viewport.addEventListener('touchmove', () => pauseBriefly(1600), { passive: true });
+  viewport.addEventListener('touchend', () => pauseBriefly(), { passive: true });
+  viewport.addEventListener('touchcancel', () => pauseBriefly(), { passive: true });
   viewport.addEventListener('click', event => {
     if (!moved) return;
     event.preventDefault();
@@ -2628,23 +2599,12 @@ function setupPanelPreviewScroll() {
 
   requestAnimationFrame(() => {
     if (panelPreviewData.length <= 1) return;
-    panelPreviewAutoPosition = getLoopWidth();
-    viewport.scrollLeft = panelPreviewAutoPosition;
-    panelPreviewLastTime = performance.now();
-    const autoScroll = time => {
-      const elapsed = Math.min(time - panelPreviewLastTime, 80);
-      panelPreviewLastTime = time;
-      if (isDragging && time - dragStartedAt > 8000) {
-        release();
-      }
-      if (!isDragging && time >= pauseUntil && !document.hidden) {
-        panelPreviewAutoPosition += elapsed * PANEL_PREVIEW_AUTO_SPEED;
-        viewport.scrollLeft = panelPreviewAutoPosition;
-        wrapScrollPosition();
-      }
-      panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
-    };
-    panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
+    viewport.scrollLeft = getLoopWidth();
+    panelPreviewAutoTimer = window.setInterval(() => {
+      if (document.hidden || viewport.classList.contains('is-interacting')) return;
+      viewport.scrollLeft += PANEL_PREVIEW_STEP;
+      wrapScrollPosition();
+    }, PANEL_PREVIEW_INTERVAL);
   });
 }
 
