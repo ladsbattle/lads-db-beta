@@ -2516,8 +2516,10 @@ function switchFolderTab(tab) {
 }
 
 function clearFolderTab() {
-  const target = activeFolderTab === 'favorites' ? '【收藏】？' : '【瀏覽記錄】？';
-  if (!confirm(`以下操作無法復原，是否確認刪除${target}`)) return;
+  const message = activeFolderTab === 'favorites'
+    ? '以下操作無法復原，是否確認刪除【收藏】？'
+    : '以下操作無法復原，是否確認刪除【瀏覽記錄】及【已看過】標籤？';
+  if (!confirm(message)) return;
   localFolder[activeFolderTab] = [];
   saveLocalFolder();
   renderCards();
@@ -2929,8 +2931,9 @@ function modalBlock(card, partner, dir) {
 
 function openPanelDetail(d, recordHistory = true) {
   const folderItem = panelFolderItem(d);
+  const wasViewedBeforeOpen = isViewed(folderItem);
   if (recordHistory) addHistoryItem(folderItem);
-  setModalViewed(true);
+  setModalViewed(wasViewedBeforeOpen);
   // restore block titles for panel cards
   document.getElementById('mUpperBlock').querySelector('.modal-block-title') && document.getElementById('mUpperBlock').querySelector('.modal-block-title').remove();
   document.getElementById('mLowerBlock').querySelector('.modal-block-title') && document.getElementById('mLowerBlock').querySelector('.modal-block-title').remove();
@@ -3159,8 +3162,9 @@ function renderEndless() {
 
 function openEndlessDetail(d, recordHistory = true) {
   const folderItem = endlessFolderItem(d);
+  const wasViewedBeforeOpen = isViewed(folderItem);
   if (recordHistory) addHistoryItem(folderItem);
-  setModalViewed(true);
+  setModalViewed(wasViewedBeforeOpen);
   // remove block titles for endless (no upper/lower layers)
   document.getElementById('mUpperBlock').querySelector('.modal-block-title') && document.getElementById('mUpperBlock').querySelector('.modal-block-title').remove();
   document.getElementById('mLowerBlock').querySelector('.modal-block-title') && document.getElementById('mLowerBlock').querySelector('.modal-block-title').remove();
