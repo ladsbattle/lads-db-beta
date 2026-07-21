@@ -614,25 +614,14 @@ header {
   display: flex;
   width: max-content;
   gap: 1rem;
-  animation: panelPreviewMarquee var(--preview-duration, 110s) linear infinite;
-}
-.panel-preview-viewport:hover .panel-preview-track,
-.panel-preview-viewport:focus-within .panel-preview-track,
-.panel-preview-viewport.is-interacting .panel-preview-track {
-  animation-play-state: paused;
+  will-change: transform;
 }
 .panel-preview .panel-card {
   width: 320px;
   flex: 0 0 320px;
 }
-@keyframes panelPreviewMarquee {
-  to { transform: translateX(calc(-50% - 0.5rem)); }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .panel-preview-track {
-    animation: none;
-  }
   .panel-preview-viewport {
     overflow-x: auto;
     -webkit-mask-image: none;
@@ -1761,6 +1750,8 @@ let layerOK = true;
 let currentData = [];
 let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
+let panelPreviewAutoFrame = null;
+let panelPreviewLastTime = 0;
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
 let CHANGELOG_DATA = [];
@@ -2509,15 +2500,14 @@ function renderPanelPreview() {
     updateScrollButtons();
     return;
   }
-  const loopData = previewData.length > 1 ? [...previewData, ...previewData] : previewData;
-  const duration = Math.max(95, previewData.length * 12);
+  const loopData = previewData.length > 1 ? [...previewData, ...previewData, ...previewData] : previewData;
   grid.innerHTML = `
     <div class="panel-preview">
       <div class="panel-preview-head">
         <span>✦ 隨機看看通關資料 ✦</span>
       </div>
       <div class="panel-preview-viewport">
-        <div class="panel-preview-track" style="--preview-duration:${duration}s">
+        <div class="panel-preview-track">
           ${loopData.map((d, i) => panelCardMarkup(d, `openPanelPreview(${i % previewData.length})`)).join('')}
         </div>
       </div>
@@ -2533,6 +2523,27 @@ function setupPanelPreviewScroll() {
   let startScrollLeft = 0;
   let moved = false;
   let releaseTimer = null;
+  let wrapping = false;
+
+  if (panelPreviewAutoFrame) {
+    window.cancelAnimationFrame(panelPreviewAutoFrame);
+    panelPreviewAutoFrame = null;
+  }
+
+  const getLoopWidth = () => viewport.scrollWidth / 3;
+
+  const wrapScrollPosition = () => {
+    if (wrapping || panelPreviewData.length <= 1) return;
+    const loopWidth = getLoopWidth();
+    if (!loopWidth) return;
+    wrapping = true;
+    if (viewport.scrollLeft < loopWidth * 0.5) {
+      viewport.scrollLeft += loopWidth;
+    } else if (viewport.scrollLeft > loopWidth * 1.5) {
+      viewport.scrollLeft -= loopWidth;
+    }
+    wrapping = false;
+  };
 
   const release = () => {
     window.clearTimeout(releaseTimer);
@@ -2565,7 +2576,8 @@ function setupPanelPreviewScroll() {
   });
 
   viewport.addEventListener('pointercancel', release);
-  viewport.addEventListener('scroll', () => {
+  viewport.addEventListener('scroll', wrapScrollPosition, { passive: true });
+  viewport.addEventListener('wheel', () => {
     viewport.classList.add('is-interacting');
     release();
   }, { passive: true });
@@ -2575,6 +2587,22 @@ function setupPanelPreviewScroll() {
     event.stopPropagation();
     moved = false;
   }, true);
+
+  requestAnimationFrame(() => {
+    if (panelPreviewData.length <= 1) return;
+    viewport.scrollLeft = getLoopWidth();
+    panelPreviewLastTime = performance.now();
+    const autoScroll = time => {
+      const elapsed = Math.min(time - panelPreviewLastTime, 80);
+      panelPreviewLastTime = time;
+      if (!viewport.classList.contains('is-interacting') && !document.hidden) {
+        viewport.scrollLeft += elapsed * 0.018;
+        wrapScrollPosition();
+      }
+      panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
+    };
+    panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
+  });
 }
 
 function cardLayerBlock(card, partner, dir, label) {
