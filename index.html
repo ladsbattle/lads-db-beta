@@ -586,17 +586,29 @@ header {
 .panel-preview-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
   padding: 0 1rem 0.8rem;
-  color: var(--text-muted);
+  color: var(--accent);
   font-size: 0.75rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
+  text-align: center;
 }
 .panel-preview-viewport {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.panel-preview-viewport::-webkit-scrollbar {
+  display: none;
+}
+.panel-preview-viewport.is-interacting {
+  cursor: grabbing;
 }
 .panel-preview-track {
   display: flex;
@@ -604,7 +616,9 @@ header {
   gap: 1rem;
   animation: panelPreviewMarquee var(--preview-duration, 110s) linear infinite;
 }
-.panel-preview-track:hover {
+.panel-preview-viewport:hover .panel-preview-track,
+.panel-preview-viewport:focus-within .panel-preview-track,
+.panel-preview-viewport.is-interacting .panel-preview-track {
   animation-play-state: paused;
 }
 .panel-preview .panel-card {
@@ -2500,7 +2514,7 @@ function renderPanelPreview() {
   grid.innerHTML = `
     <div class="panel-preview">
       <div class="panel-preview-head">
-        <span>隨機看看通關資料吧！</span>
+        <span>✦ 隨機看看通關資料 ✦</span>
       </div>
       <div class="panel-preview-viewport">
         <div class="panel-preview-track" style="--preview-duration:${duration}s">
@@ -2508,7 +2522,59 @@ function renderPanelPreview() {
         </div>
       </div>
     </div>`;
+  setupPanelPreviewScroll();
   updateScrollButtons();
+}
+
+function setupPanelPreviewScroll() {
+  const viewport = document.querySelector('.panel-preview-viewport');
+  if (!viewport) return;
+  let startX = 0;
+  let startScrollLeft = 0;
+  let moved = false;
+  let releaseTimer = null;
+
+  const release = () => {
+    window.clearTimeout(releaseTimer);
+    releaseTimer = window.setTimeout(() => {
+      viewport.classList.remove('is-interacting');
+    }, 700);
+  };
+
+  viewport.addEventListener('pointerdown', event => {
+    viewport.classList.add('is-interacting');
+    moved = false;
+    if (event.pointerType !== 'mouse') return;
+    startX = event.clientX;
+    startScrollLeft = viewport.scrollLeft;
+    viewport.setPointerCapture(event.pointerId);
+  });
+
+  viewport.addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse' || !viewport.hasPointerCapture(event.pointerId)) return;
+    const delta = event.clientX - startX;
+    if (Math.abs(delta) > 4) moved = true;
+    viewport.scrollLeft = startScrollLeft - delta;
+  });
+
+  viewport.addEventListener('pointerup', event => {
+    if (event.pointerType === 'mouse' && viewport.hasPointerCapture(event.pointerId)) {
+      viewport.releasePointerCapture(event.pointerId);
+    }
+    release();
+  });
+
+  viewport.addEventListener('pointercancel', release);
+  viewport.addEventListener('scroll', () => {
+    viewport.classList.add('is-interacting');
+    release();
+  }, { passive: true });
+  viewport.addEventListener('click', event => {
+    if (!moved) return;
+    event.preventDefault();
+    event.stopPropagation();
+    moved = false;
+  }, true);
 }
 
 function cardLayerBlock(card, partner, dir, label) {
