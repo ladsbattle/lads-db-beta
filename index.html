@@ -659,6 +659,42 @@ header {
 .panel-card:hover { background: var(--card-hover); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 .panel-card:hover::before { opacity: 1; }
 
+.viewed-card .viewed-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3.15rem;
+  height: 3.15rem;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+.viewed-card .viewed-corner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 3.15rem solid rgba(216,230,251,0.38);
+  border-left: 3.15rem solid transparent;
+  filter: drop-shadow(-1px 1px 0 rgba(255,255,255,0.08));
+}
+.viewed-card .viewed-corner span {
+  position: absolute;
+  top: 0.52rem;
+  right: -0.1rem;
+  width: 3.05rem;
+  transform: rotate(45deg);
+  color: rgba(219,232,255,0.66);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .card-labels,
 .card-meta-right {
   display: flex;
@@ -832,6 +868,41 @@ header {
   position: relative;
   animation: modalIn 0.2s ease;
   box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 40px rgba(126,184,247,0.06);
+  overflow: hidden;
+}
+.modal > * {
+  position: relative;
+  z-index: 1;
+}
+.modal.viewed-detail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 4.1rem solid rgba(216,230,251,0.32);
+  border-left: 4.1rem solid transparent;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(-1px 1px 0 rgba(255,255,255,0.08));
+}
+.modal.viewed-detail::after {
+  content: '已查看';
+  position: absolute;
+  top: 0.74rem;
+  right: -0.13rem;
+  width: 3.95rem;
+  z-index: 0;
+  pointer-events: none;
+  transform: rotate(45deg);
+  color: rgba(219,232,255,0.62);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
 }
 
 @keyframes modalIn {
@@ -2229,6 +2300,41 @@ function isFavorite(item) {
   return localFolder.favorites.some(saved => itemKey(saved) === key);
 }
 
+function isViewed(item) {
+  const key = itemKey(item);
+  return localFolder.history.some(saved => itemKey(saved) === key);
+}
+
+function encodedItemKey(item) {
+  return encodeURIComponent(itemKey(item));
+}
+
+function viewedCornerMarkup() {
+  return '<div class="viewed-corner" aria-hidden="true"><span>已查看</span></div>';
+}
+
+function viewedCardMarkup(item) {
+  return isViewed(item) ? viewedCornerMarkup() : '';
+}
+
+function viewedCardClass(item) {
+  return isViewed(item) ? ' viewed-card' : '';
+}
+
+function markViewedCards(item) {
+  const key = encodedItemKey(item);
+  document.querySelectorAll(`[data-view-key="${key}"]`).forEach(card => {
+    card.classList.add('viewed-card');
+    if (!card.querySelector('.viewed-corner')) {
+      card.insertAdjacentHTML('afterbegin', viewedCornerMarkup());
+    }
+  });
+}
+
+function setModalViewed(isViewedNow = true) {
+  document.getElementById('modal')?.classList.toggle('viewed-detail', isViewedNow);
+}
+
 function toggleFavorite(item, event) {
   if (event) event.stopPropagation();
   const key = itemKey(item);
@@ -2265,6 +2371,7 @@ function addHistoryItem(item) {
   localFolder.history.unshift({ ...item, savedAt: Date.now() });
   localFolder.history = localFolder.history.slice(0, 50);
   saveLocalFolder();
+  markViewedCards(item);
   renderFolderPanel();
 }
 
@@ -2569,12 +2676,15 @@ function hasPanelFilters() {
   );
 }
 
-function panelCardMarkup(d, action) {
+function panelCardMarkup(d, action, previewType = '', previewIndex = null) {
+  const folderItem = panelFolderItem(d);
   const orbit = escapeHtml(d.orbit);
   const orbitLabel = escapeHtml(ORBIT_LABEL[d.orbit] || d.orbit);
   const actionAttr = action ? ` onclick="${action}"` : '';
+  const previewAttrs = previewType ? ` data-preview-type="${previewType}" data-preview-index="${previewIndex}"` : '';
   return `
-    <div class="panel-card" data-orbit="${orbit}"${actionAttr}>
+    <div class="panel-card${viewedCardClass(folderItem)}" data-view-key="${escapeHtml(encodedItemKey(folderItem))}" data-orbit="${orbit}"${previewAttrs}${actionAttr}>
+      ${viewedCardMarkup(folderItem)}
       <div class="card-orbit-bar">
         <div class="card-labels">
           <span class="orbit-badge" data-orbit="${orbit}">${orbitLabel}</span>
@@ -2618,7 +2728,7 @@ function renderPanelPreview() {
     <div class="panel-preview">
       <div class="panel-preview-viewport">
         <div class="panel-preview-track">
-          ${loopData.map((d, i) => panelCardMarkup(d, '').replace('<div class="panel-card"', `<div class="panel-card" data-preview-type="panel" data-preview-index="${i % previewData.length}"`)).join('')}
+          ${loopData.map((d, i) => panelCardMarkup(d, '', 'panel', i % previewData.length)).join('')}
         </div>
       </div>
     </div>`;
@@ -2780,6 +2890,7 @@ function modalBlock(card, partner, dir) {
 function openPanelDetail(d, recordHistory = true) {
   const folderItem = panelFolderItem(d);
   if (recordHistory) addHistoryItem(folderItem);
+  setModalViewed(true);
   // restore block titles for panel cards
   document.getElementById('mUpperBlock').querySelector('.modal-block-title') && document.getElementById('mUpperBlock').querySelector('.modal-block-title').remove();
   document.getElementById('mLowerBlock').querySelector('.modal-block-title') && document.getElementById('mLowerBlock').querySelector('.modal-block-title').remove();
@@ -2929,13 +3040,16 @@ function fmtScore(s) {
   return n.toLocaleString();
 }
 
-function endlessCardMarkup(d, action) {
+function endlessCardMarkup(d, action, previewType = '', previewIndex = null) {
+  const folderItem = endlessFolderItem(d);
   const partner = escapeHtml(d.partner);
   const card = escapeHtml(d.card);
   const combo = escapeHtml(d.combo);
   const actionAttr = action ? ` onclick="${action}"` : '';
+  const previewAttrs = previewType ? ` data-preview-type="${previewType}" data-preview-index="${previewIndex}"` : '';
   return `
-    <div class="endless-card" data-partner="${partner}"${actionAttr}>
+    <div class="endless-card${viewedCardClass(folderItem)}" data-view-key="${escapeHtml(encodedItemKey(folderItem))}" data-partner="${partner}"${previewAttrs}${actionAttr}>
+      ${viewedCardMarkup(folderItem)}
       <div class="endless-card-header">
         <div class="card-labels">
           <span class="partner-badge" data-partner="${partner}">${partner}</span>
@@ -2973,7 +3087,7 @@ function renderEndlessPreview() {
     <div class="panel-preview">
       <div class="panel-preview-viewport">
         <div class="panel-preview-track">
-          ${loopData.map((d, i) => endlessCardMarkup(d, '').replace('<div class="endless-card"', `<div class="endless-card" data-preview-type="endless" data-preview-index="${i % previewData.length}"`)).join('')}
+          ${loopData.map((d, i) => endlessCardMarkup(d, '', 'endless', i % previewData.length)).join('')}
         </div>
       </div>
     </div>`;
@@ -3006,6 +3120,7 @@ function renderEndless() {
 function openEndlessDetail(d, recordHistory = true) {
   const folderItem = endlessFolderItem(d);
   if (recordHistory) addHistoryItem(folderItem);
+  setModalViewed(true);
   // remove block titles for endless (no upper/lower layers)
   document.getElementById('mUpperBlock').querySelector('.modal-block-title') && document.getElementById('mUpperBlock').querySelector('.modal-block-title').remove();
   document.getElementById('mLowerBlock').querySelector('.modal-block-title') && document.getElementById('mLowerBlock').querySelector('.modal-block-title').remove();
@@ -3036,6 +3151,7 @@ function openEndlessModal(idx) {
 function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
 function closeModalDirect() {
   document.getElementById('modalOverlay').classList.remove('show');
+  setModalViewed(false);
   document.getElementById('mLowerBlock').style.display = '';
 }
 document.addEventListener('keydown', e => {
