@@ -331,6 +331,15 @@ header {
 .layer-input:focus { border-color: var(--accent); }
 .layer-input::placeholder { color: var(--text-dim); }
 .layer-input.error-input { border-color: #f87171; }
+.layer-input:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+  background: rgba(17,30,53,0.55);
+  color: var(--text-dim);
+}
+.layer-input:disabled::placeholder {
+  color: rgba(176,200,232,0.76);
+}
 .layer-error-msg {
   display: none;
   font-size: 0.68rem;
@@ -1507,6 +1516,10 @@ select.card-input option {
   .ios-input-shell:has(.layer-input.error-input) {
     border-color: #f87171;
   }
+  .ios-input-shell:has(.layer-input:disabled) {
+    border-color: rgba(150,180,240,0.16);
+    background: rgba(17,30,53,0.45);
+  }
   .ios-input-shell .layer-input {
     width: 133.333%;
     height: 2.667rem;
@@ -1623,7 +1636,7 @@ select.card-input option {
       <div class="filter-group layer-group">
         <label>軌道層數</label>
         <div class="ios-input-shell">
-          <input class="layer-input" type="number" id="layerInput" placeholder="輸入層數" min="1" oninput="onLayerInput()">
+          <input class="layer-input" type="number" id="layerInput" placeholder="請先選軌道" min="1" oninput="onLayerInput()" disabled>
         </div>
         <div class="layer-error-msg" id="layerError">輸入內容無效</div>
       </div>
@@ -1976,6 +1989,7 @@ function selectOrbit(btn) {
     activeOrbit = orbit;
     btn.classList.add('active');
   }
+  updateLayerInputState();
   validateLayer();
 }
 
@@ -1988,6 +2002,14 @@ function clearLayerInput() {
   }
   if (errEl) errEl.classList.remove('show');
   layerOK = true;
+}
+
+function updateLayerInputState() {
+  const inp = document.getElementById('layerInput');
+  if (!inp) return;
+  const locked = !activeOrbit;
+  inp.disabled = locked;
+  inp.placeholder = locked ? '請先選軌道' : '輸入層數';
 }
 
 function validateLayer() {
@@ -2495,6 +2517,7 @@ function resetFilters() {
   activeLayerFilters = { upper: [], lower: [] };
   document.querySelectorAll('#orbitChips .chip').forEach(c => c.classList.remove('active'));
   clearLayerInput();
+  updateLayerInputState();
   document.getElementById('videoOnly').checked = false;
   applyFilters();
 }
