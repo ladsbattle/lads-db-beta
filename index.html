@@ -1752,6 +1752,7 @@ let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
 let panelPreviewAutoFrame = null;
 let panelPreviewLastTime = 0;
+const PANEL_PREVIEW_AUTO_SPEED = 0.045;
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
 let CHANGELOG_DATA = [];
@@ -2596,7 +2597,7 @@ function setupPanelPreviewScroll() {
       const elapsed = Math.min(time - panelPreviewLastTime, 80);
       panelPreviewLastTime = time;
       if (!viewport.classList.contains('is-interacting') && !document.hidden) {
-        viewport.scrollLeft += elapsed * 0.018;
+        viewport.scrollLeft += elapsed * PANEL_PREVIEW_AUTO_SPEED;
         wrapScrollPosition();
       }
       panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
