@@ -915,7 +915,7 @@ header {
 .modal-close {
   position: absolute;
   top: 1.05rem;
-  right: 1.25rem;
+  right: 4.75rem;
   width: 2.25rem;
   height: 2.25rem;
   display: inline-flex;
@@ -1746,7 +1746,7 @@ select.card-input option {
   }
   .modal-close {
     top: 0.95rem;
-    right: 1rem;
+    right: 3.85rem;
     width: 2.15rem;
     height: 2.15rem;
     font-size: 1.45rem;
@@ -1995,6 +1995,7 @@ let panelPreviewData = [];
 let endlessPreviewData = [];
 let previewAutoFrame = null;
 let previewLastTime = 0;
+let previewModalPaused = false;
 const PANEL_PREVIEW_SPEED = 0.075;
 const CONTENT_FADE_MS = 150;
 const fadeTimers = {};
@@ -2846,12 +2847,18 @@ function panelCardMarkup(d, action, previewType = '', previewIndex = null) {
 
 function openPanelPreview(idx) {
   const item = panelPreviewData[idx];
-  if (item) openPanelDetail(item);
+  if (item) {
+    previewModalPaused = true;
+    openPanelDetail(item);
+  }
 }
 
 function openEndlessPreview(idx) {
   const item = endlessPreviewData[idx];
-  if (item) openEndlessDetail(item);
+  if (item) {
+    previewModalPaused = true;
+    openEndlessDetail(item);
+  }
 }
 
 function renderPanelPreview() {
@@ -2987,7 +2994,7 @@ function setupPreviewScroll(selector, itemCount) {
     const autoScroll = time => {
       const elapsed = Math.min(time - previewLastTime, 80);
       previewLastTime = time;
-      if (!document.hidden && !isAutoPaused) {
+      if (!document.hidden && !isAutoPaused && !previewModalPaused) {
         viewport.scrollLeft += elapsed * PANEL_PREVIEW_SPEED;
         wrapScrollPosition();
       }
@@ -3306,6 +3313,8 @@ function openEndlessModal(idx) {
 function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
 function closeModalDirect() {
   document.getElementById('modalOverlay').classList.remove('show');
+  previewModalPaused = false;
+  previewLastTime = performance.now();
   setModalViewed(false);
   document.getElementById('mLowerBlock').style.display = '';
 }
