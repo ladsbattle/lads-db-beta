@@ -679,9 +679,9 @@ header {
 }
 .viewed-card .viewed-corner span {
   position: absolute;
-  top: 0.45rem;
-  right: -0.16rem;
-  width: 2.85rem;
+  top: 0.76rem;
+  right: -0.36rem;
+  width: 3.05rem;
   transform: rotate(45deg);
   color: rgba(219,232,255,0.66);
   font-size: 0.5rem;
@@ -892,9 +892,9 @@ header {
 .modal.viewed-detail::after {
   content: '已查看';
   position: absolute;
-  top: 0.58rem;
-  right: -0.24rem;
-  width: 3.4rem;
+  top: 0.92rem;
+  right: -0.48rem;
+  width: 4.05rem;
   z-index: 2;
   pointer-events: none;
   transform: rotate(45deg);
@@ -928,18 +928,7 @@ header {
 }
 
 .modal-actions-slot {
-  position: absolute;
-  top: 1rem;
-  right: 2.85rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.4rem;
-}
-
-.modal.viewed-detail .modal-actions-slot {
-  right: 1.75rem;
-  top: 3.15rem;
+  display: none;
 }
 .modal-actions-slot .save-card-btn,
 .modal-actions-slot .btn-report {
@@ -1005,6 +994,44 @@ header {
 .modal-val { font-size: 0.85rem; color: var(--text); }
 
 .modal-footer { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.modal-footer-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.modal-footer-actions .btn-fb {
+  flex: 1 1 auto;
+  min-height: 2.65rem;
+}
+
+.modal-secondary-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.modal-footer-actions .save-card-btn,
+.modal-footer-actions .btn-report {
+  width: 4.8rem;
+  min-height: 2.65rem;
+  box-sizing: border-box;
+  justify-content: center;
+  gap: 0.28rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1;
+  background: rgba(255,255,255,0.04);
+  letter-spacing: 0;
+}
+
+.modal-footer-actions .btn-report {
+  color: var(--text-muted);
+  border-color: var(--border);
+}
 
 .info-modal {
   max-width: 560px;
@@ -1666,9 +1693,9 @@ select.card-input option {
     height: 2.45rem;
   }
   .viewed-card .viewed-corner span {
-    top: 0.39rem;
-    right: -0.2rem;
-    width: 2.65rem;
+    top: 0.66rem;
+    right: -0.36rem;
+    width: 2.95rem;
     font-size: 0.46rem;
   }
   .viewed-card .card-orbit-bar .card-meta-right,
@@ -1680,17 +1707,25 @@ select.card-input option {
     height: 3.15rem;
   }
   .modal.viewed-detail::after {
-    top: 0.48rem;
-    right: -0.25rem;
-    width: 3.1rem;
+    top: 0.77rem;
+    right: -0.46rem;
+    width: 3.55rem;
     font-size: 0.5rem;
   }
   .modal.viewed-detail .modal-close {
     right: 3.45rem;
   }
-  .modal.viewed-detail .modal-actions-slot {
-    right: 1.35rem;
-    top: 3rem;
+  .modal-footer-actions {
+    flex-direction: column;
+  }
+  .modal-secondary-actions {
+    width: 100%;
+  }
+  .modal-secondary-actions .save-card-btn,
+  .modal-secondary-actions .btn-report {
+    flex: 1 1 0;
+    width: auto;
+    min-height: 2.45rem;
   }
   .endless-grid { grid-template-columns: 1fr; }
 
@@ -2443,6 +2478,20 @@ function reportButton(reportUrl) {
     </a>`;
 }
 
+function modalFooterActions(link, folderItem, reportUrl) {
+  return `
+    <div class="modal-footer-actions">
+      <a href="${escapeHtml(safeExternalUrl(link))}" target="_blank" rel="noopener" class="btn-fb">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        前往Facebook查看
+      </a>
+      <div class="modal-secondary-actions">
+        ${favoriteButton(folderItem)}
+        ${reportButton(reportUrl)}
+      </div>
+    </div>`;
+}
+
 function groupChangelogByDate(items) {
   const sortedItems = items
     .map((item, index) => ({ ...item, index }))
@@ -2979,12 +3028,8 @@ document.getElementById('mLayer').style.color = orbitColors[d.orbit] || 'var(--t
   const orbitLabel = ORBIT_LABEL[d.orbit] || d.orbit;
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdu-eI87wlkR2LnTlwc3kzHD4pz_PL1-gydhwCr7W-7HKOxyg/viewform?usp=pp_url&entry.1527588954=${encodeURIComponent(orbitLabel)}&entry.1863774587=${encodeURIComponent(d.layer)}&entry.1242930374=${encodeURIComponent(d.link)}`;
 
-  document.getElementById('mActions').innerHTML = favoriteButton(folderItem) + reportButton(reportUrl);
-  document.getElementById('mFooter').innerHTML = `
-    <a href="${escapeHtml(safeExternalUrl(d.link))}" target="_blank" rel="noopener" class="btn-fb">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-      前往Facebook查看
-    </a>`;
+  document.getElementById('mActions').innerHTML = '';
+  document.getElementById('mFooter').innerHTML = modalFooterActions(d.link, folderItem, reportUrl);
 
   document.getElementById('modalOverlay').classList.add('show');
 }
@@ -3204,12 +3249,8 @@ function openEndlessDetail(d, recordHistory = true) {
 
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdP6bWGJ6GFkyOZ7dWsqDbiup7KzTyJGxw9Feta-EqCS3pG6w/viewform?usp=pp_url&entry.1527588954=${encodeURIComponent(d.partner)}&entry.1242930374=${encodeURIComponent(d.link)}`;
 
-  document.getElementById('mActions').innerHTML = favoriteButton(folderItem) + reportButton(reportUrl);
-  document.getElementById('mFooter').innerHTML = `
-    <a href="${escapeHtml(safeExternalUrl(d.link))}" target="_blank" rel="noopener" class="btn-fb">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-      前往Facebook查看
-    </a>`;
+  document.getElementById('mActions').innerHTML = '';
+  document.getElementById('mFooter').innerHTML = modalFooterActions(d.link, folderItem, reportUrl);
   document.getElementById('modalOverlay').classList.add('show');
 }
 
