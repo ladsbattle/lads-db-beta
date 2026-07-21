@@ -665,6 +665,7 @@ header {
   right: 0;
   width: 2.75rem;
   height: 2.75rem;
+  border-top-right-radius: inherit;
   z-index: 4;
   pointer-events: none;
   overflow: hidden;
@@ -672,13 +673,9 @@ header {
 .viewed-card .viewed-corner::before {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-top: 2.75rem solid rgba(216,230,251,0.34);
-  border-left: 2.75rem solid transparent;
-  filter: drop-shadow(-1px 1px 0 rgba(255,255,255,0.08));
+  inset: 0;
+  background: linear-gradient(45deg, transparent 49%, rgba(216,230,251,0.34) 50%);
+  box-shadow: inset -1px 1px 0 rgba(255,255,255,0.08);
 }
 .viewed-card .viewed-corner span {
   position: absolute;
@@ -886,7 +883,7 @@ header {
   right: 0;
   width: 3.7rem;
   height: 3.7rem;
-  border-top-right-radius: inherit;
+  border-top-right-radius: 14px;
   background: linear-gradient(45deg, transparent 49%, rgba(216,230,251,0.3) 50%);
   z-index: 0;
   pointer-events: none;
@@ -1667,10 +1664,6 @@ select.card-input option {
   .viewed-card .viewed-corner {
     width: 2.45rem;
     height: 2.45rem;
-  }
-  .viewed-card .viewed-corner::before {
-    border-top-width: 2.45rem;
-    border-left-width: 2.45rem;
   }
   .viewed-card .viewed-corner span {
     top: 0.39rem;
