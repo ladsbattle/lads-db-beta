@@ -575,6 +575,57 @@ header {
   gap: 1rem;
 }
 
+.panel-preview {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(15,26,46,0.62);
+  padding: 1rem 0;
+}
+.panel-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1rem 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.panel-preview-viewport {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.panel-preview-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  animation: panelPreviewMarquee var(--preview-duration, 110s) linear infinite;
+}
+.panel-preview-track:hover {
+  animation-play-state: paused;
+}
+.panel-preview .panel-card {
+  width: 320px;
+  flex: 0 0 320px;
+}
+@keyframes panelPreviewMarquee {
+  to { transform: translateX(calc(-50% - 0.5rem)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-preview-track {
+    animation: none;
+  }
+  .panel-preview-viewport {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 /* Card */
 .panel-card {
   background: var(--card);
@@ -1461,6 +1512,21 @@ select.card-input option {
     width: 100%;
   }
   .cards-grid { grid-template-columns: 1fr; }
+  .panel-preview {
+    border-radius: 10px;
+    padding: 0.8rem 0;
+  }
+  .panel-preview-head {
+    padding: 0 0.85rem 0.65rem;
+    font-size: 0.7rem;
+  }
+  .panel-preview-track {
+    gap: 0.75rem;
+  }
+  .panel-preview .panel-card {
+    width: min(78vw, 300px);
+    flex-basis: min(78vw, 300px);
+  }
   .endless-grid { grid-template-columns: 1fr; }
 
   /* tab nav fits smaller screens */
@@ -1680,6 +1746,7 @@ let activeEndlessCard = null;
 let layerOK = true;
 let currentData = [];
 let activeLayerFilters = { upper: [], lower: [] };
+let panelPreviewData = [];
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
 let CHANGELOG_DATA = [];
@@ -1791,6 +1858,7 @@ async function init() {
     const res = await fetch(CSV_URL);
     const text = await res.text();
     DATA = parseCSV(text);
+    panelPreviewData = samplePanelPreviewData();
     applyFilters();
   } catch (err) {
     document.getElementById('resultsInfo').innerHTML = '⚠ 資料載入失敗，請重新整理頁面';
@@ -2352,6 +2420,22 @@ function resetFilters() {
   applyFilters();
 }
 
+function samplePanelPreviewData(count = 10) {
+  const pool = [...DATA];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(count, pool.length));
+}
+
+function getPanelPreviewData() {
+  if (panelPreviewData.length === 0 && DATA.length > 0) {
+    panelPreviewData = samplePanelPreviewData();
+  }
+  return panelPreviewData;
+}
+
 function hasPanelFilters() {
   const layerInput = document.getElementById('layerInput');
   const videoOnly = document.getElementById('videoOnly');
@@ -2373,37 +2457,11 @@ function hasEndlessFilters() {
   );
 }
 
-function cardLayerBlock(card, partner, dir, label) {
-  if (card === 'N/A') return `<div class="layer-block"><div class="layer-label">${escapeHtml(label)}</div><div class="layer-info"><span class="na-text">單層面板</span></div></div>`;
-  const safeDir = dir === '順' || dir === '逆' ? dir : '';
-  const dirHtml = safeDir
-    ? `<span class="dir-tag dir-${safeDir}" style="margin-left:auto">${safeDir}譜</span>`
-    : '';
-  return `<div class="layer-block">
-    <div class="layer-label">${escapeHtml(label)}</div>
-    <div class="layer-info">
-      <div><div class="card-name">${escapeHtml(card)}</div><div class="partner-name">${escapeHtml(partner)}</div></div>
-      ${dirHtml}
-    </div>
-  </div>`;
-}
-
-function renderCards() {
-  const grid = document.getElementById('cardsGrid');
-  const infoText = hasPanelFilters()
-    ? `共找到 <span>${currentData.length}</span> 筆結果`
-    : `目前收錄軌道資料 <span>${DATA.length}</span> 筆`;
-  document.getElementById('resultsInfo').innerHTML = infoText;
-  if (currentData.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
-    updateScrollButtons();
-    return;
-  }
-  grid.innerHTML = currentData.map((d, i) => {
-    const orbit = escapeHtml(d.orbit);
-    const orbitLabel = escapeHtml(ORBIT_LABEL[d.orbit] || d.orbit);
-    return `
-    <div class="panel-card" data-orbit="${orbit}" onclick="openModal(${i})">
+function panelCardMarkup(d, action) {
+  const orbit = escapeHtml(d.orbit);
+  const orbitLabel = escapeHtml(ORBIT_LABEL[d.orbit] || d.orbit);
+  return `
+    <div class="panel-card" data-orbit="${orbit}" onclick="${action}">
       <div class="card-orbit-bar">
         <div class="card-labels">
           <span class="orbit-badge" data-orbit="${orbit}">${orbitLabel}</span>
@@ -2422,7 +2480,69 @@ function renderCards() {
         <span class="link-hint">點擊查看詳情 →</span>
       </div>
     </div>`;
-  }).join('');
+}
+
+function openPanelPreview(idx) {
+  const item = panelPreviewData[idx];
+  if (item) openPanelDetail(item);
+}
+
+function renderPanelPreview() {
+  const grid = document.getElementById('cardsGrid');
+  const previewData = getPanelPreviewData();
+  if (previewData.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>目前尚無軌道資料</p></div>`;
+    updateScrollButtons();
+    return;
+  }
+  const loopData = previewData.length > 1 ? [...previewData, ...previewData] : previewData;
+  const duration = Math.max(95, previewData.length * 12);
+  grid.innerHTML = `
+    <div class="panel-preview">
+      <div class="panel-preview-head">
+        <span>隨機看看通關資料吧！</span>
+      </div>
+      <div class="panel-preview-viewport">
+        <div class="panel-preview-track" style="--preview-duration:${duration}s">
+          ${loopData.map((d, i) => panelCardMarkup(d, `openPanelPreview(${i % previewData.length})`)).join('')}
+        </div>
+      </div>
+    </div>`;
+  updateScrollButtons();
+}
+
+function cardLayerBlock(card, partner, dir, label) {
+  if (card === 'N/A') return `<div class="layer-block"><div class="layer-label">${escapeHtml(label)}</div><div class="layer-info"><span class="na-text">單層面板</span></div></div>`;
+  const safeDir = dir === '順' || dir === '逆' ? dir : '';
+  const dirHtml = safeDir
+    ? `<span class="dir-tag dir-${safeDir}" style="margin-left:auto">${safeDir}譜</span>`
+    : '';
+  return `<div class="layer-block">
+    <div class="layer-label">${escapeHtml(label)}</div>
+    <div class="layer-info">
+      <div><div class="card-name">${escapeHtml(card)}</div><div class="partner-name">${escapeHtml(partner)}</div></div>
+      ${dirHtml}
+    </div>
+  </div>`;
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const hasFilters = hasPanelFilters();
+  const infoText = hasPanelFilters()
+    ? `共找到 <span>${currentData.length}</span> 筆結果`
+    : `目前收錄軌道資料 <span>${DATA.length}</span> 筆`;
+  document.getElementById('resultsInfo').innerHTML = infoText;
+  if (!hasFilters) {
+    renderPanelPreview();
+    return;
+  }
+  if (currentData.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
+    updateScrollButtons();
+    return;
+  }
+  grid.innerHTML = currentData.map((d, i) => panelCardMarkup(d, `openModal(${i})`)).join('');
   updateScrollButtons();
 }
 
