@@ -592,6 +592,8 @@ header {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
   gap: 1rem;
+  position: relative;
+  contain: layout paint;
 }
 
 .panel-preview {
@@ -601,6 +603,9 @@ header {
   border-radius: 12px;
   background: rgba(15,26,46,0.62);
   padding: 1rem 0;
+  contain: layout paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .panel-preview-viewport {
   overflow-x: auto;
@@ -627,6 +632,16 @@ header {
 .panel-preview .endless-card {
   width: 300px;
   flex: 0 0 300px;
+}
+.preview-clearing .panel-preview {
+  height: 0;
+  max-height: 0;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1297,6 +1312,8 @@ header {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
+  position: relative;
+  contain: layout paint;
 }
 .endless-card {
   background: var(--card);
@@ -2034,6 +2051,7 @@ let previewModalPaused = false;
 const PANEL_PREVIEW_SPEED = 0.075;
 const CONTENT_FADE_MS = 150;
 const fadeTimers = {};
+const fadeVersions = {};
 let tabFadeTimer = null;
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
@@ -2048,14 +2066,18 @@ function loadingMarkup() {
 
 function fadeSwap(key, elements, update, afterUpdate) {
   const targets = elements.filter(Boolean);
+  fadeVersions[key] = (fadeVersions[key] || 0) + 1;
+  const version = fadeVersions[key];
   if (fadeTimers[key]) window.clearTimeout(fadeTimers[key]);
   targets.forEach(el => {
     el.classList.add('content-transition');
     el.classList.add('is-fading');
   });
   fadeTimers[key] = window.setTimeout(() => {
+    if (version !== fadeVersions[key]) return;
     update();
     window.requestAnimationFrame(() => {
+      if (version !== fadeVersions[key]) return;
       targets.forEach(el => el.classList.remove('is-fading'));
       if (afterUpdate) afterUpdate();
     });
@@ -2926,8 +2948,10 @@ function stopPreviewAutoScroll() {
 function clearPreviewBeforeResults(grid) {
   if (!grid || !grid.querySelector('.panel-preview')) return;
   stopPreviewAutoScroll();
+  grid.classList.add('preview-clearing');
+  void grid.offsetHeight;
   grid.replaceChildren();
-  grid.classList.remove('is-fading');
+  grid.classList.remove('is-fading', 'preview-clearing');
   void grid.offsetHeight;
 }
 
