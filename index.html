@@ -2923,6 +2923,14 @@ function stopPreviewAutoScroll() {
   previewAutoFrame = null;
 }
 
+function clearPreviewBeforeResults(grid) {
+  if (!grid || !grid.querySelector('.panel-preview')) return;
+  stopPreviewAutoScroll();
+  grid.replaceChildren();
+  grid.classList.remove('is-fading');
+  void grid.offsetHeight;
+}
+
 function setupPreviewScroll(selector, itemCount) {
   const viewport = document.querySelector(selector);
   if (!viewport) return;
@@ -3061,6 +3069,7 @@ function renderCards() {
   const infoText = hasFilters
     ? `共找到 <span>${currentData.length}</span> 筆結果`
     : `目前收錄軌道資料 <span>${DATA.length}</span> 筆`;
+  if (hasFilters) clearPreviewBeforeResults(grid);
   fadeSwap('panel-results', [info, grid], () => {
     info.innerHTML = infoText;
     if (!hasFilters) {
@@ -3302,6 +3311,7 @@ function renderEndless() {
   const infoText = hasFixedResults
     ? `共找到 <span>${ENDLESS_DATA.length}</span> 筆結果`
     : `目前收錄無盡挑戰資料 <span>${ENDLESS_ALL.length}</span> 筆`;
+  if (hasFixedResults) clearPreviewBeforeResults(grid);
   fadeSwap('endless-results', [info, grid], () => {
     info.innerHTML = infoText;
     if (!hasFixedResults) {
