@@ -663,8 +663,8 @@ header {
   position: absolute;
   top: 0;
   right: 0;
-  width: 3.15rem;
-  height: 3.15rem;
+  width: 2.75rem;
+  height: 2.75rem;
   z-index: 4;
   pointer-events: none;
   overflow: hidden;
@@ -676,23 +676,28 @@ header {
   right: 0;
   width: 0;
   height: 0;
-  border-top: 3.15rem solid rgba(216,230,251,0.38);
-  border-left: 3.15rem solid transparent;
+  border-top: 2.75rem solid rgba(216,230,251,0.34);
+  border-left: 2.75rem solid transparent;
   filter: drop-shadow(-1px 1px 0 rgba(255,255,255,0.08));
 }
 .viewed-card .viewed-corner span {
   position: absolute;
-  top: 0.52rem;
-  right: -0.1rem;
-  width: 3.05rem;
+  top: 0.45rem;
+  right: -0.16rem;
+  width: 2.85rem;
   transform: rotate(45deg);
   color: rgba(219,232,255,0.66);
-  font-size: 0.56rem;
+  font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+}
+
+.viewed-card .card-orbit-bar .card-meta-right,
+.viewed-card .endless-card-header .card-meta-right {
+  padding-right: 2.55rem;
 }
 
 .card-labels,
@@ -881,8 +886,8 @@ header {
   right: 0;
   width: 0;
   height: 0;
-  border-top: 4.1rem solid rgba(216,230,251,0.32);
-  border-left: 4.1rem solid transparent;
+  border-top: 3.45rem solid rgba(216,230,251,0.3);
+  border-left: 3.45rem solid transparent;
   z-index: 0;
   pointer-events: none;
   filter: drop-shadow(-1px 1px 0 rgba(255,255,255,0.08));
@@ -890,14 +895,14 @@ header {
 .modal.viewed-detail::after {
   content: '已查看';
   position: absolute;
-  top: 0.74rem;
-  right: -0.13rem;
-  width: 3.95rem;
+  top: 0.61rem;
+  right: -0.2rem;
+  width: 3.4rem;
   z-index: 0;
   pointer-events: none;
   transform: rotate(45deg);
   color: rgba(219,232,255,0.62);
-  font-size: 0.6rem;
+  font-size: 0.54rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -928,6 +933,10 @@ header {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.4rem;
+}
+
+.modal.viewed-detail .modal-actions-slot {
+  right: 4.35rem;
 }
 .modal-actions-slot .save-card-btn,
 .modal-actions-slot .btn-report {
@@ -1648,6 +1657,37 @@ select.card-input option {
   .panel-preview .endless-card {
     width: min(78vw, 290px);
     flex-basis: min(78vw, 290px);
+  }
+  .viewed-card .viewed-corner {
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+  .viewed-card .viewed-corner::before {
+    border-top-width: 2.45rem;
+    border-left-width: 2.45rem;
+  }
+  .viewed-card .viewed-corner span {
+    top: 0.39rem;
+    right: -0.2rem;
+    width: 2.65rem;
+    font-size: 0.46rem;
+  }
+  .viewed-card .card-orbit-bar .card-meta-right,
+  .viewed-card .endless-card-header .card-meta-right {
+    padding-right: 2.15rem;
+  }
+  .modal.viewed-detail::before {
+    border-top-width: 3rem;
+    border-left-width: 3rem;
+  }
+  .modal.viewed-detail::after {
+    top: 0.52rem;
+    right: -0.25rem;
+    width: 3.1rem;
+    font-size: 0.5rem;
+  }
+  .modal.viewed-detail .modal-actions-slot {
+    right: 3.55rem;
   }
   .endless-grid { grid-template-columns: 1fr; }
 
