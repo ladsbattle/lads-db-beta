@@ -1967,6 +1967,7 @@ async function init() {
 function selectOrbit(btn) {
   const orbit = btn.dataset.orbit;
   activeLayerFilters = { upper: [], lower: [] };
+  clearLayerInput();
   if (activeOrbit === orbit) {
     activeOrbit = null;
     btn.classList.remove('active');
@@ -1976,6 +1977,17 @@ function selectOrbit(btn) {
     btn.classList.add('active');
   }
   validateLayer();
+}
+
+function clearLayerInput() {
+  const inp = document.getElementById('layerInput');
+  const errEl = document.getElementById('layerError');
+  if (inp) {
+    inp.value = '';
+    inp.classList.remove('error-input');
+  }
+  if (errEl) errEl.classList.remove('show');
+  layerOK = true;
 }
 
 function validateLayer() {
@@ -2472,11 +2484,8 @@ function resetFilters() {
   activeOrbit = null;
   activeLayerFilters = { upper: [], lower: [] };
   document.querySelectorAll('#orbitChips .chip').forEach(c => c.classList.remove('active'));
-  document.getElementById('layerInput').value = '';
-  document.getElementById('layerInput').classList.remove('error-input');
-  document.getElementById('layerError').classList.remove('show');
+  clearLayerInput();
   document.getElementById('videoOnly').checked = false;
-  layerOK = true;
   applyFilters();
 }
 
