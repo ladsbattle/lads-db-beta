@@ -1752,6 +1752,7 @@ let activeLayerFilters = { upper: [], lower: [] };
 let panelPreviewData = [];
 let panelPreviewAutoFrame = null;
 let panelPreviewLastTime = 0;
+let panelPreviewAutoPosition = 0;
 const PANEL_PREVIEW_AUTO_SPEED = 0.045;
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
@@ -2517,6 +2518,12 @@ function renderPanelPreview() {
   updateScrollButtons();
 }
 
+function stopPanelPreviewAutoScroll() {
+  if (!panelPreviewAutoFrame) return;
+  window.cancelAnimationFrame(panelPreviewAutoFrame);
+  panelPreviewAutoFrame = null;
+}
+
 function setupPanelPreviewScroll() {
   const viewport = document.querySelector('.panel-preview-viewport');
   if (!viewport) return;
@@ -2525,41 +2532,63 @@ function setupPanelPreviewScroll() {
   let moved = false;
   let releaseTimer = null;
   let wrapping = false;
+  let isDragging = false;
+  let pauseUntil = 0;
+  let dragStartedAt = 0;
 
-  if (panelPreviewAutoFrame) {
-    window.cancelAnimationFrame(panelPreviewAutoFrame);
-    panelPreviewAutoFrame = null;
-  }
+  stopPanelPreviewAutoScroll();
 
   const getLoopWidth = () => viewport.scrollWidth / 3;
 
   const wrapScrollPosition = () => {
-    if (wrapping || panelPreviewData.length <= 1) return;
+    if (wrapping || panelPreviewData.length <= 1) {
+      panelPreviewAutoPosition = viewport.scrollLeft;
+      return;
+    }
     const loopWidth = getLoopWidth();
     if (!loopWidth) return;
     wrapping = true;
-    if (viewport.scrollLeft < loopWidth * 0.5) {
-      viewport.scrollLeft += loopWidth;
-    } else if (viewport.scrollLeft > loopWidth * 1.5) {
-      viewport.scrollLeft -= loopWidth;
+    let nextScrollLeft = viewport.scrollLeft;
+    if (nextScrollLeft < loopWidth * 0.5) {
+      nextScrollLeft += loopWidth;
+    } else if (nextScrollLeft > loopWidth * 1.5) {
+      nextScrollLeft -= loopWidth;
     }
+    if (nextScrollLeft !== viewport.scrollLeft) {
+      viewport.scrollLeft = nextScrollLeft;
+    }
+    panelPreviewAutoPosition = nextScrollLeft;
     wrapping = false;
   };
 
-  const release = () => {
+  const pauseBriefly = (duration = 900) => {
+    pauseUntil = performance.now() + duration;
+    viewport.classList.add('is-interacting');
     window.clearTimeout(releaseTimer);
     releaseTimer = window.setTimeout(() => {
       viewport.classList.remove('is-interacting');
-    }, 700);
+    }, duration);
+  };
+
+  const release = () => {
+    isDragging = false;
+    panelPreviewAutoPosition = viewport.scrollLeft;
+    pauseBriefly();
   };
 
   viewport.addEventListener('pointerdown', event => {
     viewport.classList.add('is-interacting');
+    pauseUntil = Infinity;
+    isDragging = true;
+    dragStartedAt = performance.now();
     moved = false;
-    if (event.pointerType !== 'mouse') return;
     startX = event.clientX;
     startScrollLeft = viewport.scrollLeft;
-    viewport.setPointerCapture(event.pointerId);
+    if (event.pointerType === 'mouse') {
+      viewport.setPointerCapture(event.pointerId);
+    }
+    window.addEventListener('pointerup', release, { once: true });
+    window.addEventListener('pointercancel', release, { once: true });
   });
 
   viewport.addEventListener('pointermove', event => {
@@ -2567,6 +2596,8 @@ function setupPanelPreviewScroll() {
     const delta = event.clientX - startX;
     if (Math.abs(delta) > 4) moved = true;
     viewport.scrollLeft = startScrollLeft - delta;
+    panelPreviewAutoPosition = viewport.scrollLeft;
+    wrapScrollPosition();
   });
 
   viewport.addEventListener('pointerup', event => {
@@ -2579,9 +2610,15 @@ function setupPanelPreviewScroll() {
   viewport.addEventListener('pointercancel', release);
   viewport.addEventListener('scroll', wrapScrollPosition, { passive: true });
   viewport.addEventListener('wheel', () => {
-    viewport.classList.add('is-interacting');
-    release();
+    panelPreviewAutoPosition = viewport.scrollLeft;
+    pauseBriefly(1000);
   }, { passive: true });
+  viewport.addEventListener('touchstart', () => {
+    pauseUntil = Infinity;
+    viewport.classList.add('is-interacting');
+  }, { passive: true });
+  viewport.addEventListener('touchend', release, { passive: true });
+  viewport.addEventListener('touchcancel', release, { passive: true });
   viewport.addEventListener('click', event => {
     if (!moved) return;
     event.preventDefault();
@@ -2591,13 +2628,18 @@ function setupPanelPreviewScroll() {
 
   requestAnimationFrame(() => {
     if (panelPreviewData.length <= 1) return;
-    viewport.scrollLeft = getLoopWidth();
+    panelPreviewAutoPosition = getLoopWidth();
+    viewport.scrollLeft = panelPreviewAutoPosition;
     panelPreviewLastTime = performance.now();
     const autoScroll = time => {
       const elapsed = Math.min(time - panelPreviewLastTime, 80);
       panelPreviewLastTime = time;
-      if (!viewport.classList.contains('is-interacting') && !document.hidden) {
-        viewport.scrollLeft += elapsed * PANEL_PREVIEW_AUTO_SPEED;
+      if (isDragging && time - dragStartedAt > 8000) {
+        release();
+      }
+      if (!isDragging && time >= pauseUntil && !document.hidden) {
+        panelPreviewAutoPosition += elapsed * PANEL_PREVIEW_AUTO_SPEED;
+        viewport.scrollLeft = panelPreviewAutoPosition;
         wrapScrollPosition();
       }
       panelPreviewAutoFrame = window.requestAnimationFrame(autoScroll);
@@ -2632,6 +2674,7 @@ function renderCards() {
     renderPanelPreview();
     return;
   }
+  stopPanelPreviewAutoScroll();
   if (currentData.length === 0) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
     updateScrollButtons();
