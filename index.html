@@ -462,7 +462,10 @@ header {
   padding-top: 1rem;
   border-top: 1px solid var(--border);
 }
-.dynamic-filter-panel.show { display: block; }
+.dynamic-filter-panel.show {
+  display: block;
+  animation: sectionFadeIn 0.2s ease both;
+}
 .dynamic-filter-header {
   display: flex;
   align-items: center;
@@ -543,6 +546,15 @@ header {
   letter-spacing: 0.05em;
 }
 .results-info span { color: var(--accent); }
+.content-transition {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.content-transition.is-fading {
+  opacity: 0;
+  transform: translateY(4px);
+}
 .loading-inline {
   display: inline-flex;
   align-items: center;
@@ -1089,7 +1101,14 @@ header {
 
 /* ── Section visibility ── */
 .section { display: none; }
-.section.active { display: block; }
+.section.active {
+  display: block;
+  animation: sectionFadeIn 0.2s ease both;
+}
+@keyframes sectionFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* ── Endless challenge cards ── */
 .endless-filter-panel {
@@ -1737,6 +1756,9 @@ let panelPreviewData = [];
 let panelPreviewAutoTimer = null;
 const PANEL_PREVIEW_STEP = 1;
 const PANEL_PREVIEW_INTERVAL = 45;
+const CONTENT_FADE_MS = 150;
+const fadeTimers = {};
+let tabFadeTimer = null;
 let activeFolderTab = 'favorites';
 let localFolder = { favorites: [], history: [] };
 let CHANGELOG_DATA = [];
@@ -1746,6 +1768,23 @@ const LOCAL_FOLDER_KEY = 'ladsbattle_local_folder_v1';
 
 function loadingMarkup() {
   return '<span class="loading-inline"><span class="loading-spinner"></span><span class="loading-text">資料載入中…</span></span>';
+}
+
+function fadeSwap(key, elements, update, afterUpdate) {
+  const targets = elements.filter(Boolean);
+  if (fadeTimers[key]) window.clearTimeout(fadeTimers[key]);
+  targets.forEach(el => {
+    el.classList.add('content-transition');
+    el.classList.add('is-fading');
+  });
+  fadeTimers[key] = window.setTimeout(() => {
+    update();
+    window.requestAnimationFrame(() => {
+      targets.forEach(el => el.classList.remove('is-fading'));
+      if (afterUpdate) afterUpdate();
+    });
+    fadeTimers[key] = null;
+  }, CONTENT_FADE_MS);
 }
 
 function formatTaipeiDateTime(value) {
@@ -2606,23 +2645,24 @@ function cardLayerBlock(card, partner, dir, label) {
 
 function renderCards() {
   const grid = document.getElementById('cardsGrid');
+  const info = document.getElementById('resultsInfo');
   const hasFilters = hasPanelFilters();
-  const infoText = hasPanelFilters()
+  const infoText = hasFilters
     ? `共找到 <span>${currentData.length}</span> 筆結果`
     : `目前收錄軌道資料 <span>${DATA.length}</span> 筆`;
-  document.getElementById('resultsInfo').innerHTML = infoText;
-  if (!hasFilters) {
-    renderPanelPreview();
-    return;
-  }
-  stopPanelPreviewAutoScroll();
-  if (currentData.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
-    updateScrollButtons();
-    return;
-  }
-  grid.innerHTML = currentData.map((d, i) => panelCardMarkup(d, `openModal(${i})`)).join('');
-  updateScrollButtons();
+  fadeSwap('panel-results', [info, grid], () => {
+    info.innerHTML = infoText;
+    if (!hasFilters) {
+      renderPanelPreview();
+      return;
+    }
+    stopPanelPreviewAutoScroll();
+    if (currentData.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
+      return;
+    }
+    grid.innerHTML = currentData.map((d, i) => panelCardMarkup(d, `openModal(${i})`)).join('');
+  }, updateScrollButtons);
 }
 
 function dirTag(dir) {
@@ -2677,11 +2717,28 @@ function openModal(idx) {
 }
 
 function switchTab(tab, btn) {
+  const nextSection = document.getElementById('section-' + tab);
+  const currentSection = document.querySelector('.section.active');
+  if (!nextSection || currentSection === nextSection) return;
+  if (tabFadeTimer) window.clearTimeout(tabFadeTimer);
+
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('section-' + tab).classList.add('active');
-  updateScrollButtons();
+
+  if (currentSection) {
+    currentSection.classList.add('content-transition', 'is-fading');
+  }
+  tabFadeTimer = window.setTimeout(() => {
+    document.querySelectorAll('.section').forEach(s => {
+      s.classList.remove('active', 'is-fading');
+    });
+    nextSection.classList.add('active', 'content-transition', 'is-fading');
+    window.requestAnimationFrame(() => {
+      nextSection.classList.remove('is-fading');
+      updateScrollButtons();
+    });
+    tabFadeTimer = null;
+  }, CONTENT_FADE_MS);
 }
 
 function selectPartnerDropdown(value) {
@@ -2766,44 +2823,45 @@ function fmtScore(s) {
 function renderEndless() {
   const grid = document.getElementById('endlessGrid');
   const info = document.getElementById('endlessInfo');
-  info.innerHTML = hasEndlessFilters()
+  const infoText = hasEndlessFilters()
     ? `共找到 <span>${ENDLESS_DATA.length}</span> 筆結果`
     : `目前收錄無盡挑戰資料 <span>${ENDLESS_ALL.length}</span> 筆`;
-  if (ENDLESS_DATA.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
-    updateScrollButtons();
-    return;
-  }
-  grid.innerHTML = ENDLESS_DATA.map((d, i) => {
-    const partner = escapeHtml(d.partner);
-    const card = escapeHtml(d.card);
-    const combo = escapeHtml(d.combo);
-    return `
-    <div class="endless-card" data-partner="${partner}" onclick="openEndlessModal(${i})">
-      <div class="endless-card-header">
-        <div class="card-labels">
-          <span class="partner-badge" data-partner="${partner}">${partner}</span>
-          ${d.hasVideo ? '<span class="video-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> 附影片</span>' : ''}
+  fadeSwap('endless-results', [info, grid], () => {
+    info.innerHTML = infoText;
+    if (ENDLESS_DATA.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
+      return;
+    }
+    grid.innerHTML = ENDLESS_DATA.map((d, i) => {
+      const partner = escapeHtml(d.partner);
+      const card = escapeHtml(d.card);
+      const combo = escapeHtml(d.combo);
+      return `
+      <div class="endless-card" data-partner="${partner}" onclick="openEndlessModal(${i})">
+        <div class="endless-card-header">
+          <div class="card-labels">
+            <span class="partner-badge" data-partner="${partner}">${partner}</span>
+            ${d.hasVideo ? '<span class="video-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> 附影片</span>' : ''}
+          </div>
+          <div class="card-meta-right">
+            <span class="endless-score">${escapeHtml(fmtScore(d.score))} 分</span>
+          </div>
         </div>
-        <div class="card-meta-right">
-          <span class="endless-score">${escapeHtml(fmtScore(d.score))} 分</span>
+        <div class="endless-info-row">
+          <span class="endless-info-label">日卡</span>
+          <span class="endless-info-val">${card}</span>
         </div>
-      </div>
-      <div class="endless-info-row">
-        <span class="endless-info-label">日卡</span>
-        <span class="endless-info-val">${card}</span>
-      </div>
-      <div class="endless-info-row">
-        <span class="endless-info-label">對譜數</span>
-        <span class="combo-tag">${combo} 譜</span>
-      </div>
-      <div class="endless-footer">
-        <span></span>
-        <span class="link-hint">點擊查看詳情 →</span>
-      </div>
-    </div>`;
-  }).join('');
-  updateScrollButtons();
+        <div class="endless-info-row">
+          <span class="endless-info-label">對譜數</span>
+          <span class="combo-tag">${combo} 譜</span>
+        </div>
+        <div class="endless-footer">
+          <span></span>
+          <span class="link-hint">點擊查看詳情 →</span>
+        </div>
+      </div>`;
+    }).join('');
+  }, updateScrollButtons);
 }
 
 function openEndlessDetail(d, recordHistory = true) {
