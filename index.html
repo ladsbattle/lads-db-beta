@@ -2471,6 +2471,16 @@ function applyFilters() {
   const layerVal = document.getElementById('layerInput').value.trim();
   const layerNum = layerVal !== '' ? parseInt(layerVal) : null;
   const videoOnly = document.getElementById('videoOnly').checked;
+  const shouldSearch = Boolean(activeOrbit || videoOnly);
+  if (!shouldSearch) {
+    activeLayerFilters = { upper: [], lower: [] };
+    currentData = [...DATA];
+    const noMatch = document.getElementById('dynamicNoMatch');
+    if (noMatch) noMatch.classList.remove('show');
+    renderDynamicFilters([], null);
+    renderCards();
+    return;
+  }
   const baseData = getBasePanelData(layerNum, videoOnly);
   renderDynamicFilters(baseData, layerNum);
   currentData = baseData.filter(d => matchesLayerFilters(d, 'upper') && matchesLayerFilters(d, 'lower'));
@@ -2506,11 +2516,9 @@ function getPanelPreviewData() {
 }
 
 function hasPanelFilters() {
-  const layerInput = document.getElementById('layerInput');
   const videoOnly = document.getElementById('videoOnly');
   return Boolean(
     activeOrbit ||
-    (layerInput && layerInput.value.trim() !== '') ||
     (videoOnly && videoOnly.checked) ||
     activeLayerFilters.upper.length > 0 ||
     activeLayerFilters.lower.length > 0
