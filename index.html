@@ -930,19 +930,27 @@ header {
   transition: color 0.2s, border-color 0.2s, background 0.2s;
   z-index: 5;
 }
+.modal-close::before,
+.modal-close::after {
+  content: '';
+  position: absolute;
+  width: 1.15rem;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.9;
+  transform-origin: center;
+}
 .modal-close::before {
-  content: '×';
-  display: block;
-  font-family: Arial, sans-serif;
-  font-size: 1.8rem;
-  font-weight: 600;
-  line-height: 1;
-  transform: translateY(-0.02em);
+  transform: rotate(45deg);
+}
+.modal-close::after {
+  transform: rotate(-45deg);
 }
 .modal-close:hover { color: var(--text); border-color: var(--border); background: rgba(255,255,255,0.06); }
 
 #modal > .modal-close {
-  top: 1.05rem;
+  top: 1.45rem;
   right: 4.25rem;
 }
 
@@ -1764,10 +1772,12 @@ select.card-input option {
     width: 2.15rem;
     height: 2.15rem;
   }
-  .modal-close::before {
-    font-size: 1.7rem;
+  .modal-close::before,
+  .modal-close::after {
+    width: 1.08rem;
   }
   #modal > .modal-close {
+    top: 1.35rem;
     right: 3.35rem;
   }
   .modal-footer-actions {
