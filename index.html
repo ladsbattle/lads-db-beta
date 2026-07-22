@@ -971,41 +971,6 @@ header {
   right: 4.25rem;
 }
 
-.modal-actions-slot {
-  display: none;
-}
-.modal-actions-slot .save-card-btn,
-.modal-actions-slot .btn-report {
-  width: 4.75rem;
-  height: 1.85rem;
-  box-sizing: border-box;
-  justify-content: center;
-  gap: 0.28rem;
-  padding: 0;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  line-height: 1;
-  background: rgba(255,255,255,0.04);
-  letter-spacing: 0;
-}
-.modal-actions-slot .btn-report {
-  color: var(--text-muted);
-  border-color: var(--border);
-}
-.modal-actions-slot .btn-report:hover {
-  border-color: var(--border-bright);
-  color: var(--text);
-  background: rgba(255,255,255,0.08);
-}
-.modal-actions-slot .btn-report svg {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-}
-.modal-actions-slot .save-card-btn svg {
-  width: 12px;
-  height: 12px;
-}
 .modal-header { margin-bottom: 1.25rem; }
 .modal-orbit { margin-bottom: 0.4rem; }
 .modal-layer {
@@ -1991,7 +1956,6 @@ select.card-input option {
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modal">
     <button class="modal-close" onclick="closeModalDirect()" aria-label="關閉">✕</button>
-    <div class="modal-actions-slot" id="mActions"></div>
     <div class="modal-header">
       <div class="modal-orbit" id="mOrbit"></div>
       <div class="modal-layer" id="mLayer"></div>
@@ -2307,7 +2271,7 @@ function validateLayer() {
       inp.classList.add('error-input');
       if (errEl) {
         errEl.textContent = !isNaN(num) && activeOrbit && num > limit
-          ? `目前最高開放至 ${limit} 層`
+          ? `此軌道目前最高開放至 ${limit} 層`
           : '請輸入有效層數';
       }
       errEl.classList.add('show');
@@ -3185,7 +3149,6 @@ document.getElementById('mLayer').style.color = orbitColors[d.orbit] || 'var(--t
   const orbitLabel = ORBIT_LABEL[d.orbit] || d.orbit;
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdu-eI87wlkR2LnTlwc3kzHD4pz_PL1-gydhwCr7W-7HKOxyg/viewform?usp=pp_url&entry.1527588954=${encodeURIComponent(orbitLabel)}&entry.1863774587=${encodeURIComponent(d.layer)}&entry.1242930374=${encodeURIComponent(d.link)}`;
 
-  document.getElementById('mActions').innerHTML = '';
   document.getElementById('mFooter').innerHTML = modalFooterActions(d.link, folderItem, reportUrl);
 
   document.getElementById('modalOverlay').classList.add('show');
@@ -3407,7 +3370,6 @@ function openEndlessDetail(d, recordHistory = true) {
 
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdP6bWGJ6GFkyOZ7dWsqDbiup7KzTyJGxw9Feta-EqCS3pG6w/viewform?usp=pp_url&entry.1527588954=${encodeURIComponent(d.partner)}&entry.1242930374=${encodeURIComponent(d.link)}`;
 
-  document.getElementById('mActions').innerHTML = '';
   document.getElementById('mFooter').innerHTML = modalFooterActions(d.link, folderItem, reportUrl);
   document.getElementById('modalOverlay').classList.add('show');
 }
