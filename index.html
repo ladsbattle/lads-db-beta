@@ -2259,6 +2259,33 @@ function clearLayerInput() {
   layerOK = true;
 }
 
+function clearPanelResultsForInvalidLayer() {
+  activeLayerFilters = { upper: [], lower: [] };
+  currentData = [];
+  const dynamicNoMatch = document.getElementById('dynamicNoMatch');
+  const info = document.getElementById('resultsInfo');
+  const grid = document.getElementById('cardsGrid');
+
+  renderDynamicFilters([], null);
+  if (dynamicNoMatch) dynamicNoMatch.classList.remove('show');
+
+  fadeVersions['panel-results'] = (fadeVersions['panel-results'] || 0) + 1;
+  if (fadeTimers['panel-results']) {
+    window.clearTimeout(fadeTimers['panel-results']);
+    fadeTimers['panel-results'] = null;
+  }
+  stopPreviewAutoScroll();
+  if (info) {
+    info.classList.remove('is-fading');
+    info.innerHTML = '';
+  }
+  if (grid) {
+    grid.classList.remove('is-fading', 'preview-clearing');
+    grid.replaceChildren();
+  }
+  updateScrollButtons();
+}
+
 function updateLayerInputState() {
   const inp = document.getElementById('layerInput');
   if (!inp) return;
@@ -2278,7 +2305,13 @@ function validateLayer() {
     if (isNaN(num) || num < 1 || num > limit) {
       layerOK = false;
       inp.classList.add('error-input');
+      if (errEl) {
+        errEl.textContent = !isNaN(num) && activeOrbit && num > limit
+          ? `目前最高開放至 ${limit} 層`
+          : '請輸入有效層數';
+      }
       errEl.classList.add('show');
+      clearPanelResultsForInvalidLayer();
     } else {
       inp.classList.remove('error-input');
       errEl.classList.remove('show');
@@ -2799,6 +2832,10 @@ function matchesLayerFilters(d, side) {
 }
 
 function applyFilters() {
+  if (!layerOK) {
+    clearPanelResultsForInvalidLayer();
+    return;
+  }
   const layerVal = document.getElementById('layerInput').value.trim();
   const layerNum = layerVal !== '' ? parseInt(layerVal) : null;
   const videoOnly = document.getElementById('videoOnly').checked;
@@ -3102,7 +3139,7 @@ function renderCards() {
     }
     stopPreviewAutoScroll();
     if (currentData.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">✦</div><p>找不到符合條件的結果，期待您成為第一位分享者</p></div>`;
       return;
     }
     grid.innerHTML = currentData.map((d, i) => panelCardMarkup(d, `openModal(${i})`)).join('');
@@ -3344,7 +3381,7 @@ function renderEndless() {
     }
     stopPreviewAutoScroll();
     if (ENDLESS_DATA.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">😣</div><p>找不到符合條件的結果，期待您成為第一位分享者✨</p></div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.3">✦</div><p>找不到符合條件的結果，期待您成為第一位分享者</p></div>`;
       return;
     }
     grid.innerHTML = ENDLESS_DATA.map((d, i) => endlessCardMarkup(d, `openEndlessModal(${i})`)).join('');
@@ -3435,7 +3472,7 @@ updateScrollButtons();
     戀與深空戰鬥討論群
   </a>
   , created by 
-  <a href="https://www.threads.com/@tingtingwang_tw" target="_blank" rel="noopener">
+  <a href="https://www.facebook.com/groups/1655830235133299/user/61579601102041" target="_blank" rel="noopener">
     Ting Ting Wang
   </a>
   <div id="lastUpdated"></div>
