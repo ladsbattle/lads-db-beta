@@ -1185,6 +1185,38 @@ header {
   letter-spacing: 0.08em;
   margin-bottom: 0.5rem;
 }
+.version-history-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.version-history-toggle .version-history-date {
+  margin-bottom: 0;
+}
+.version-history-toggle-text {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+.version-history-toggle:hover .version-history-toggle-text {
+  color: var(--text-muted);
+}
+.version-history-group.is-collapsed .version-history-items {
+  display: none;
+}
+.version-history-group.is-collapsed {
+  padding-bottom: 0.85rem;
+}
 .version-history-items {
   margin: 0;
   padding-left: 0;
@@ -1499,25 +1531,56 @@ select.card-input option {
 }
 .folder-close:hover { color: #ffffff; }
 .folder-tabs {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.45rem;
-  padding: 0.75rem 1rem 0;
+  gap: 0;
+  margin: 0.75rem 1rem 0;
+  padding: 0.22rem;
+  border: 1px solid rgba(184,212,255,0.24);
+  border-radius: 999px;
+  background: rgba(7,16,31,0.42);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.025);
+}
+.folder-tabs::before {
+  content: '';
+  position: absolute;
+  top: 0.22rem;
+  left: 0.22rem;
+  width: calc((100% - 0.44rem) / 2);
+  height: calc(100% - 0.44rem);
+  border-radius: 999px;
+  border: 1px solid rgba(184,212,255,0.48);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.055)),
+    rgba(145,165,202,0.13);
+  box-shadow:
+    0 0 16px rgba(160,184,224,0.12),
+    inset 0 0 0 1px rgba(255,255,255,0.045);
+  transition: transform 0.24s ease;
+  pointer-events: none;
+}
+.folder-tabs[data-active="history"]::before {
+  transform: translateX(100%);
 }
 .folder-tab {
-  padding: 0.42rem 0.75rem;
+  position: relative;
+  z-index: 1;
+  min-height: 2rem;
+  padding: 0.36rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid rgba(184,212,255,0.24);
-  background: rgba(255,255,255,0.05);
+  border: 0;
+  background: transparent;
   color: rgba(219,232,255,0.72);
   font-family: 'Noto Sans TC', sans-serif;
   font-size: 0.74rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: color 0.2s ease, font-weight 0.2s ease;
 }
 .folder-tab.active {
-  border-color: rgba(184,212,255,0.48);
-  background: rgba(255,255,255,0.12);
   color: #dbe8ff;
+  font-weight: 700;
 }
 .folder-toolbar {
   display: flex;
@@ -2693,14 +2756,30 @@ function renderVersionHistory() {
     list.innerHTML = '<div class="version-history-empty">目前尚無版本紀錄。</div>';
     return;
   }
-  list.innerHTML = groupChangelogByDate(CHANGELOG_DATA).map(group => `
-    <div class="version-history-group">
-      <div class="version-history-date">${escapeHtml(group.date)}</div>
+  list.innerHTML = groupChangelogByDate(CHANGELOG_DATA).map((group, index) => `
+    <div class="version-history-group${index > 0 ? ' is-collapsed' : ''}">
+      ${index === 0 ? `
+        <div class="version-history-date">${escapeHtml(group.date)}</div>
+      ` : `
+        <button class="version-history-toggle" type="button" aria-expanded="false" onclick="toggleVersionHistoryGroup(this)">
+          <span class="version-history-date">${escapeHtml(group.date)}</span>
+          <span class="version-history-toggle-text">展開</span>
+        </button>
+      `}
       <ul class="version-history-items">
         ${group.notes.map(note => `<li>${escapeHtml(note)}</li>`).join('')}
       </ul>
     </div>
   `).join('');
+}
+
+function toggleVersionHistoryGroup(button) {
+  const group = button.closest('.version-history-group');
+  if (!group) return;
+  const collapsed = group.classList.toggle('is-collapsed');
+  button.setAttribute('aria-expanded', String(!collapsed));
+  const label = button.querySelector('.version-history-toggle-text');
+  if (label) label.textContent = collapsed ? '展開' : '收合';
 }
 
 function openInfoModal() {
@@ -2769,6 +2848,7 @@ function renderFolderPanel() {
   const list = document.getElementById('folderList');
   const clearBtn = document.getElementById('folderClearBtn');
   if (!panel || !list || !clearBtn) return;
+  document.querySelector('.folder-tabs')?.setAttribute('data-active', activeFolderTab);
   document.querySelectorAll('.folder-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === activeFolderTab);
   });
@@ -3514,7 +3594,7 @@ updateScrollButtons();
     </div>
     <button class="folder-close" onclick="closeFolderPanel()" aria-label="關閉資料夾">✕</button>
   </div>
-  <div class="folder-tabs">
+  <div class="folder-tabs" data-active="favorites">
     <button class="folder-tab active" data-tab="favorites" onclick="switchFolderTab('favorites')">收藏</button>
     <button class="folder-tab" data-tab="history" onclick="switchFolderTab('history')">瀏覽記錄</button>
   </div>
