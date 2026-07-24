@@ -1100,57 +1100,45 @@ header {
 
 .info-modal {
   max-width: 560px;
-  height: min(31rem, calc(100vh - 2rem));
-  max-height: calc(100vh - 2rem);
+  max-height: min(70vh, calc(100vh - 2rem));
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.info-tabs {
-  display: flex;
-  gap: 0.55rem;
-  margin: 0 2.2rem 1.1rem 0;
-}
-
-.info-tab {
-  min-width: 5rem;
-  height: 2rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
-  color: var(--text-muted);
-  font-family: 'Noto Sans TC', sans-serif;
-  font-size: 0.78rem;
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-.info-tab:hover,
-.info-tab.active {
-  color: var(--text);
-  border-color: var(--border-bright);
-  background: rgba(184,212,255,0.12);
-}
-
-.info-panel {
-  display: none;
+.info-content {
   min-height: 0;
   overflow-y: auto;
   padding-right: 0.25rem;
 }
-.info-panel.active {
-  display: block;
-  flex: 1;
+
+.info-section {
+  padding: 0.2rem 0 1.1rem;
 }
 
-.info-intro {
+.info-section + .info-section {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 1.05rem;
+}
+
+.info-section-title {
+  margin: 0 2.3rem 0.65rem 0;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.info-section-desc {
   color: var(--text-muted);
   font-size: 0.82rem;
   line-height: 1.9;
 }
-.info-intro p {
+
+.info-section-desc p {
   margin: 0 0 1rem;
 }
+
 .info-link-button {
   display: inline-flex;
   align-items: center;
@@ -1171,14 +1159,17 @@ header {
   border-color: var(--border-bright);
 }
 .version-history-list {
-  height: 100%;
   max-height: none;
-  overflow-y: auto;
+  overflow: visible;
   padding-right: 0.25rem;
 }
 .version-history-group {
   padding: 0.95rem 0;
   border-top: 1px solid rgba(255,255,255,0.08);
+}
+.version-history-group:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 .version-history-date {
   color: var(--accent);
@@ -1658,7 +1649,7 @@ select.card-input option {
 
 @media (max-width: 600px) {
   .info-modal {
-    height: min(29rem, calc(100vh - 2rem));
+    max-height: min(72vh, calc(100vh - 2rem));
   }
 
   .local-folder-panel {
@@ -2050,18 +2041,20 @@ select.card-input option {
 <div class="modal-overlay" id="infoOverlay" onclick="closeInfoModal(event)">
   <div class="modal info-modal">
     <button class="modal-close" onclick="closeInfoModalDirect()" aria-label="關閉">✕</button>
-    <div class="info-tabs">
-      <button class="info-tab active" data-info-tab="intro" onclick="switchInfoTab('intro')">介紹</button>
-      <button class="info-tab" data-info-tab="history" onclick="switchInfoTab('history')">版本紀錄</button>
-    </div>
-    <div class="info-panel info-intro active" id="infoPanelIntro">
-      <p>本站收錄「戀與深空戰鬥討論群_臉書面板分享專區」的戰鬥資料，包含開放穩定軌道、開放波動軌道、定向軌道及無盡挑戰等，獵人可以在此進行查詢，也歡迎加入下方專區分享、存檔您的通關資料</p>
-      <a class="info-link-button" href="https://www.facebook.com/share/g/18qcHFWDrj/" target="_blank" rel="noopener">前往面板分享專區</a>
-    </div>
-    <div class="info-panel" id="infoPanelHistory">
-      <div class="version-history-list" id="versionHistoryList">
-        <div class="version-history-empty">版本紀錄載入中…</div>
-      </div>
+    <div class="info-content">
+      <section class="info-section">
+        <h2 class="info-section-title">關於面板資料庫</h2>
+        <div class="info-section-desc">
+          <p>本站收錄「戀與深空戰鬥討論群_臉書面板分享專區」的戰鬥資料，包含開放穩定軌道、開放波動軌道、定向軌道及無盡挑戰等，獵人可以在此進行查詢，也歡迎加入下方專區分享、存檔您的通關資料</p>
+          <a class="info-link-button" href="https://www.facebook.com/share/g/18qcHFWDrj/" target="_blank" rel="noopener">前往面板分享專區</a>
+        </div>
+      </section>
+      <section class="info-section">
+        <h2 class="info-section-title">版本紀錄</h2>
+        <div class="version-history-list" id="versionHistoryList">
+          <div class="version-history-empty">版本紀錄載入中…</div>
+        </div>
+      </section>
     </div>
   </div>
 </div>
@@ -2703,17 +2696,8 @@ function renderVersionHistory() {
   `).join('');
 }
 
-function switchInfoTab(tab) {
-  document.querySelectorAll('.info-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.infoTab === tab);
-  });
-  document.getElementById('infoPanelIntro')?.classList.toggle('active', tab === 'intro');
-  document.getElementById('infoPanelHistory')?.classList.toggle('active', tab === 'history');
-  if (tab === 'history') renderVersionHistory();
-}
-
-function openInfoModal(tab = 'intro') {
-  switchInfoTab(tab);
+function openInfoModal() {
+  renderVersionHistory();
   document.getElementById('infoOverlay')?.classList.add('show');
 }
 
