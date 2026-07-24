@@ -1105,55 +1105,28 @@ header {
 }
 
 .info-tabs {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: min(16rem, calc(100% - 4.25rem));
-  margin: 0 auto 1.1rem;
-  padding: 0.24rem;
-  gap: 0;
-  border: 1px solid rgba(184,212,255,0.2);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.035);
-  isolation: isolate;
-}
-
-.info-tabs::before {
-  content: '';
-  position: absolute;
-  top: 0.24rem;
-  left: 0.24rem;
-  width: calc((100% - 0.48rem) / 2);
-  height: calc(100% - 0.48rem);
-  border-radius: 999px;
-  border: 1px solid rgba(184,212,255,0.5);
-  background: linear-gradient(180deg, rgba(184,212,255,0.2), rgba(184,212,255,0.08));
-  box-shadow: inset 0 0 12px rgba(255,255,255,0.04);
-  transition: transform 0.22s ease;
-}
-
-.info-tabs[data-active="history"]::before {
-  transform: translateX(100%);
+  display: flex;
+  gap: 0.55rem;
+  margin: 0 2.2rem 1.1rem 0;
 }
 
 .info-tab {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  height: 1.85rem;
+  min-width: 5rem;
+  height: 2rem;
   border-radius: 999px;
-  border: 0;
-  background: transparent;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
   color: var(--text-muted);
   font-family: 'Noto Sans TC', sans-serif;
   font-size: 0.78rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 .info-tab:hover,
 .info-tab.active {
   color: var(--text);
+  border-color: var(--border-bright);
+  background: rgba(184,212,255,0.12);
 }
 
 .info-panel {
@@ -1520,50 +1493,24 @@ select.card-input option {
 }
 .folder-close:hover { color: #ffffff; }
 .folder-tabs {
-  position: relative;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: min(15rem, calc(100% - 2rem));
-  margin: 0.75rem auto 0;
-  padding: 0.24rem;
-  gap: 0;
-  border: 1px solid rgba(184,212,255,0.22);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.045);
-  isolation: isolate;
-}
-.folder-tabs::before {
-  content: '';
-  position: absolute;
-  top: 0.24rem;
-  left: 0.24rem;
-  width: calc((100% - 0.48rem) / 2);
-  height: calc(100% - 0.48rem);
-  border-radius: 999px;
-  border: 1px solid rgba(184,212,255,0.46);
-  background: linear-gradient(180deg, rgba(219,232,255,0.18), rgba(219,232,255,0.08));
-  box-shadow: inset 0 0 12px rgba(255,255,255,0.04);
-  transition: transform 0.22s ease;
-}
-.folder-tabs[data-active="history"]::before {
-  transform: translateX(100%);
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  padding: 0.75rem 1rem 0;
 }
 .folder-tab {
-  position: relative;
-  z-index: 1;
-  min-height: 1.8rem;
-  padding: 0 0.65rem;
+  padding: 0.42rem 0.75rem;
   border-radius: 999px;
-  border: 0;
-  background: transparent;
+  border: 1px solid rgba(184,212,255,0.24);
+  background: rgba(255,255,255,0.05);
   color: rgba(219,232,255,0.72);
   font-family: 'Noto Sans TC', sans-serif;
   font-size: 0.74rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s ease;
 }
 .folder-tab.active {
+  border-color: rgba(184,212,255,0.48);
+  background: rgba(255,255,255,0.12);
   color: #dbe8ff;
 }
 .folder-toolbar {
@@ -2091,7 +2038,7 @@ select.card-input option {
 <div class="modal-overlay" id="infoOverlay" onclick="closeInfoModal(event)">
   <div class="modal info-modal">
     <button class="modal-close" onclick="closeInfoModalDirect()" aria-label="關閉">✕</button>
-    <div class="info-tabs" data-active="intro">
+    <div class="info-tabs">
       <button class="info-tab active" data-info-tab="intro" onclick="switchInfoTab('intro')">介紹</button>
       <button class="info-tab" data-info-tab="history" onclick="switchInfoTab('history')">版本紀錄</button>
     </div>
@@ -2748,7 +2695,6 @@ function switchInfoTab(tab) {
   document.querySelectorAll('.info-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.infoTab === tab);
   });
-  document.querySelector('.info-tabs')?.setAttribute('data-active', tab);
   document.getElementById('infoPanelIntro')?.classList.toggle('active', tab === 'intro');
   document.getElementById('infoPanelHistory')?.classList.toggle('active', tab === 'history');
   if (tab === 'history') renderVersionHistory();
@@ -2823,7 +2769,6 @@ function renderFolderPanel() {
   document.querySelectorAll('.folder-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === activeFolderTab);
   });
-  document.querySelector('.folder-tabs')?.setAttribute('data-active', activeFolderTab);
   const items = localFolder[activeFolderTab] || [];
   clearBtn.disabled = items.length === 0;
   if (items.length === 0) {
@@ -3566,7 +3511,7 @@ updateScrollButtons();
     </div>
     <button class="folder-close" onclick="closeFolderPanel()" aria-label="關閉資料夾">✕</button>
   </div>
-  <div class="folder-tabs" data-active="favorites">
+  <div class="folder-tabs">
     <button class="folder-tab active" data-tab="favorites" onclick="switchFolderTab('favorites')">收藏</button>
     <button class="folder-tab" data-tab="history" onclick="switchFolderTab('history')">瀏覽記錄</button>
   </div>
