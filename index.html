@@ -1107,8 +1107,8 @@ header {
 }
 
 .info-modal > .modal-close {
-  top: 0.95rem;
-  right: 2.45rem;
+  top: 1.45rem;
+  right: 2.2rem;
   width: 1.85rem;
   height: 1.85rem;
 }
@@ -1119,10 +1119,27 @@ header {
   height: 1.4px;
 }
 
+.info-modal-header {
+  flex-shrink: 0;
+  min-height: 1.9rem;
+  display: flex;
+  align-items: center;
+  padding-right: 3.25rem;
+  margin-bottom: 1.15rem;
+}
+
+.info-modal-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.22rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .info-content {
   min-height: 0;
   overflow-y: auto;
-  padding: 2.55rem 3.25rem 0 0;
+  padding: 0 0.45rem 0 0;
   scrollbar-gutter: stable;
 }
 
@@ -1136,7 +1153,7 @@ header {
 }
 
 .info-section-title {
-  margin: 0 3.6rem 0.65rem 0;
+  margin: 0 0 0.65rem;
   color: var(--text);
   font-size: 0.92rem;
   font-weight: 600;
@@ -1790,8 +1807,8 @@ select.card-input option {
     max-height: min(72vh, calc(100vh - 2rem));
   }
   .info-modal > .modal-close {
-    top: 0.85rem;
-    right: 2.1rem;
+    top: 1.38rem;
+    right: 1.95rem;
     width: 1.75rem;
     height: 1.75rem;
   }
@@ -1799,8 +1816,16 @@ select.card-input option {
   .info-modal > .modal-close::after {
     width: 0.86rem;
   }
+  .info-modal-header {
+    min-height: 1.8rem;
+    padding-right: 3rem;
+    margin-bottom: 1rem;
+  }
+  .info-modal-title {
+    font-size: 1.12rem;
+  }
   .info-content {
-    padding: 2.25rem 2.65rem 0 0;
+    padding: 0 0.4rem 0 0;
   }
 
   .local-folder-panel {
@@ -2192,9 +2217,12 @@ select.card-input option {
 <div class="modal-overlay" id="infoOverlay" onclick="closeInfoModal(event)">
   <div class="modal info-modal">
     <button class="modal-close" onclick="closeInfoModalDirect()" aria-label="關閉">✕</button>
+    <div class="info-modal-header">
+      <h2 class="info-modal-title">關於</h2>
+    </div>
     <div class="info-content">
       <section class="info-section">
-        <h2 class="info-section-title">關於本站</h2>
+        <h2 class="info-section-title">介紹</h2>
         <div class="info-section-desc">
           <p>本站收錄「戀與深空戰鬥討論群_臉書面板分享專區」的戰鬥資料，包含開放穩定軌道、開放波動軌道、定向軌道及無盡挑戰等，獵人可以在此進行查詢，也歡迎加入下方專區分享、存檔您的通關資料</p>
           <a class="info-link-button" href="https://www.facebook.com/share/g/18qcHFWDrj/" target="_blank" rel="noopener">前往面板分享專區</a>
