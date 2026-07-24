@@ -1106,17 +1106,24 @@ header {
   overflow: hidden;
 }
 
+.info-modal > .modal-close {
+  top: 0.95rem;
+  right: 2.45rem;
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.info-modal > .modal-close::before,
+.info-modal > .modal-close::after {
+  width: 0.92rem;
+  height: 1.4px;
+}
+
 .info-content {
   min-height: 0;
   overflow-y: auto;
-  padding-right: 0.75rem;
+  padding-right: 0.45rem;
   scrollbar-gutter: stable;
-}
-
-@media (min-width: 601px) {
-  .info-content {
-    margin-right: 2.4rem;
-  }
 }
 
 .info-section {
@@ -1129,7 +1136,7 @@ header {
 }
 
 .info-section-title {
-  margin: 0 2.3rem 0.65rem 0;
+  margin: 0 3.6rem 0.65rem 0;
   color: var(--text);
   font-size: 0.92rem;
   font-weight: 600;
@@ -1720,6 +1727,16 @@ select.card-input option {
 @media (max-width: 600px) {
   .info-modal {
     max-height: min(72vh, calc(100vh - 2rem));
+  }
+  .info-modal > .modal-close {
+    top: 0.85rem;
+    right: 2.1rem;
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  .info-modal > .modal-close::before,
+  .info-modal > .modal-close::after {
+    width: 0.86rem;
   }
 
   .local-folder-panel {
