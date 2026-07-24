@@ -1173,17 +1173,50 @@ header {
   border-color: var(--border-bright);
 }
 .version-history-list {
+  position: relative;
   max-height: none;
   overflow: visible;
-  padding-right: 0.25rem;
+  padding: 0 0.25rem 0 1.45rem;
+}
+.version-history-list::before {
+  content: "";
+  position: absolute;
+  left: 0.34rem;
+  top: 0.2rem;
+  bottom: 0.55rem;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(184,212,255,0.58),
+    rgba(184,212,255,0.18) 72%,
+    rgba(184,212,255,0)
+  );
 }
 .version-history-group {
+  position: relative;
   padding: 0.95rem 0;
   border-top: 1px solid rgba(255,255,255,0.08);
+}
+.version-history-group::before {
+  content: "";
+  position: absolute;
+  left: -1.34rem;
+  top: 1.18rem;
+  width: 0.52rem;
+  height: 0.52rem;
+  box-sizing: border-box;
+  border: 1px solid rgba(184,212,255,0.62);
+  border-radius: 999px;
+  background: #101a2e;
+  box-shadow: 0 0 0 4px rgba(16,26,46,0.92), 0 0 12px rgba(184,212,255,0.12);
 }
 .version-history-group:first-child {
   padding-top: 0;
   border-top: 0;
+}
+.version-history-group:first-child::before {
+  top: 0.23rem;
+  background: rgba(184,212,255,0.78);
 }
 .version-history-date {
   color: var(--accent);
@@ -1219,18 +1252,32 @@ header {
   border: 1px solid rgba(184,212,255,0.22);
   border-radius: 999px;
   color: var(--text-dim);
-  font-size: 0.95rem;
+  font-size: 0;
   line-height: 1;
-  transform: rotate(90deg);
-  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  text-align: center;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.version-history-toggle-icon::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-0.05rem, -0.05rem);
+  transform-origin: center;
 }
 .version-history-toggle:hover .version-history-toggle-icon {
   color: var(--text-muted);
   border-color: rgba(184,212,255,0.4);
+  background: rgba(184,212,255,0.06);
 }
-.version-history-toggle[aria-expanded="true"] .version-history-toggle-icon {
-  font-size: 0.9rem;
-  transform: rotate(0deg);
+.version-history-toggle[aria-expanded="true"] .version-history-toggle-icon::before {
+  width: 0.52rem;
+  height: 1.5px;
+  border: 0;
+  border-radius: 999px;
+  background: currentColor;
+  transform: none;
 }
 .version-history-group.is-collapsed .version-history-items {
   display: none;
@@ -2798,7 +2845,7 @@ function renderVersionHistory() {
       ` : `
         <button class="version-history-toggle" type="button" aria-expanded="false" aria-label="展開 ${escapeHtml(formatChangelogDate(group.date))}" onclick="toggleVersionHistoryGroup(this)">
           <span class="version-history-date">${escapeHtml(formatChangelogDate(group.date))}</span>
-          <span class="version-history-toggle-icon" aria-hidden="true">›</span>
+          <span class="version-history-toggle-icon" aria-hidden="true"></span>
         </button>
       `}
       <ul class="version-history-items">
@@ -2815,8 +2862,6 @@ function toggleVersionHistoryGroup(button) {
   button.setAttribute('aria-expanded', String(!collapsed));
   const date = button.querySelector('.version-history-date')?.textContent || '版本紀錄';
   button.setAttribute('aria-label', `${collapsed ? '展開' : '收合'} ${date}`);
-  const icon = button.querySelector('.version-history-toggle-icon');
-  if (icon) icon.textContent = collapsed ? '›' : '−';
 }
 
 function openInfoModal() {
