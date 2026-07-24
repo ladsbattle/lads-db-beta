@@ -1209,14 +1209,28 @@ header {
 .version-history-toggle .version-history-date {
   margin-bottom: 0;
 }
-.version-history-toggle-text {
+.version-history-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 1px solid rgba(184,212,255,0.22);
+  border-radius: 999px;
   color: var(--text-dim);
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  font-size: 0.95rem;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
-.version-history-toggle:hover .version-history-toggle-text {
+.version-history-toggle:hover .version-history-toggle-icon {
   color: var(--text-muted);
+  border-color: rgba(184,212,255,0.4);
+}
+.version-history-toggle[aria-expanded="true"] .version-history-toggle-icon {
+  font-size: 0.9rem;
+  transform: rotate(0deg);
 }
 .version-history-group.is-collapsed .version-history-items {
   display: none;
@@ -2130,7 +2144,7 @@ select.card-input option {
     <button class="modal-close" onclick="closeInfoModalDirect()" aria-label="關閉">✕</button>
     <div class="info-content">
       <section class="info-section">
-        <h2 class="info-section-title">關於面板資料庫</h2>
+        <h2 class="info-section-title">關於本站</h2>
         <div class="info-section-desc">
           <p>本站收錄「戀與深空戰鬥討論群_臉書面板分享專區」的戰鬥資料，包含開放穩定軌道、開放波動軌道、定向軌道及無盡挑戰等，獵人可以在此進行查詢，也歡迎加入下方專區分享、存檔您的通關資料</p>
           <a class="info-link-button" href="https://www.facebook.com/share/g/18qcHFWDrj/" target="_blank" rel="noopener">前往面板分享專區</a>
@@ -2758,6 +2772,10 @@ function groupChangelogByDate(items) {
   return [...groups.entries()].map(([date, notes]) => ({ date, notes }));
 }
 
+function formatChangelogDate(date) {
+  return String(date || '').replace(/-/g, '.');
+}
+
 function renderVersionHistory() {
   const list = document.getElementById('versionHistoryList');
   if (!list) return;
@@ -2776,11 +2794,11 @@ function renderVersionHistory() {
   list.innerHTML = groupChangelogByDate(CHANGELOG_DATA).map((group, index) => `
     <div class="version-history-group${index > 0 ? ' is-collapsed' : ''}">
       ${index === 0 ? `
-        <div class="version-history-date">${escapeHtml(group.date)}</div>
+        <div class="version-history-date">${escapeHtml(formatChangelogDate(group.date))}</div>
       ` : `
-        <button class="version-history-toggle" type="button" aria-expanded="false" onclick="toggleVersionHistoryGroup(this)">
-          <span class="version-history-date">${escapeHtml(group.date)}</span>
-          <span class="version-history-toggle-text">展開</span>
+        <button class="version-history-toggle" type="button" aria-expanded="false" aria-label="展開 ${escapeHtml(formatChangelogDate(group.date))}" onclick="toggleVersionHistoryGroup(this)">
+          <span class="version-history-date">${escapeHtml(formatChangelogDate(group.date))}</span>
+          <span class="version-history-toggle-icon" aria-hidden="true">›</span>
         </button>
       `}
       <ul class="version-history-items">
@@ -2795,8 +2813,10 @@ function toggleVersionHistoryGroup(button) {
   if (!group) return;
   const collapsed = group.classList.toggle('is-collapsed');
   button.setAttribute('aria-expanded', String(!collapsed));
-  const label = button.querySelector('.version-history-toggle-text');
-  if (label) label.textContent = collapsed ? '展開' : '收合';
+  const date = button.querySelector('.version-history-date')?.textContent || '版本紀錄';
+  button.setAttribute('aria-label', `${collapsed ? '展開' : '收合'} ${date}`);
+  const icon = button.querySelector('.version-history-toggle-icon');
+  if (icon) icon.textContent = collapsed ? '›' : '−';
 }
 
 function openInfoModal() {
