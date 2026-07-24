@@ -1109,7 +1109,14 @@ header {
 .info-content {
   min-height: 0;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding-right: 0.75rem;
+  scrollbar-gutter: stable;
+}
+
+@media (min-width: 601px) {
+  .info-content {
+    margin-right: 2.4rem;
+  }
 }
 
 .info-section {
